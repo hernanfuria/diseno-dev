@@ -72,6 +72,8 @@ class Graph:
     def addNode(self, value):
         """Adds a Node with a `value` to the Graph"""
 
+        self.nodes.append(_Node(value=value))
+
     def getNode(self, value):
         """Returns the first appearance of a Node which value matches the `value` parameter."""
 
