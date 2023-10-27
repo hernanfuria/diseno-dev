@@ -77,6 +77,12 @@ class Graph:
     def getNode(self, value):
         """Returns the first appearance of a Node which value matches the `value` parameter."""
 
+        for n in self.nodes:
+            if n.getValue() == value:
+                return n
+
+        return None
+
     def hasNode(self, value) -> bool:
         """Returns True if the Graph contains a Node with value `value`, returns False otherwise."""
 
