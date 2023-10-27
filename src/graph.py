@@ -10,6 +10,8 @@ class _Node:
     def setValue(self, value):
         """Sets the value stored in the Node."""
 
+        self.value = value
+
     def getValue(self):
         """Returns the value stored in the Node."""
 
