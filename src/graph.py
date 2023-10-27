@@ -15,6 +15,8 @@ class _Node:
     def getValue(self):
         """Returns the value stored in the Node."""
 
+        return self.value
+
     def __str__(self):
         pass
 
