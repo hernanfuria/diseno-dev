@@ -86,6 +86,12 @@ class Graph:
     def hasNode(self, value) -> bool:
         """Returns True if the Graph contains a Node with value `value`, returns False otherwise."""
 
+        for n in self.nodes:
+            if n.getValue() == value:
+                return True
+
+        return False
+
     def removeNode(self, value) -> bool:
         """
         Removes the first appearance of a Node which value matches the `value` parameter.
