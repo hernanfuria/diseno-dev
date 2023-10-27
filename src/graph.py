@@ -98,6 +98,18 @@ class Graph:
         Returns True if a Node was removed, returns False otherwise.
         """
 
+        idx_to_pop = -1
+        for n_idx, n in enumerate(self.nodes):
+            if n.getValue() == value:
+                idx_to_pop = n_idx
+                break
+
+        if idx_to_pop != -1:
+            self.nodes.pop(idx_to_pop)
+            return True
+
+        return False
+
     def addEdge(self, value0, value1, weight: int | float = 1):
         """Adds an Edge that connects `value0` and `value1` (if the Nodes exist) with `weight` to the Graph."""
 
