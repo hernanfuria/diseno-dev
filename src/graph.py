@@ -131,6 +131,14 @@ class Graph:
     def getEdge(self, value0, value1) -> _Edge | None:
         """Returns the first appearance of an Edge which values matches the `value0` and `value1` parameters."""
 
+        if self.hasNode(value0) and self.hasNode(value1):
+            for e in self.edges:
+                if (e.getEndpoint(0).getValue() == value0 and e.getEndpoint(0).getValue() == value1) or \
+                        (e.getEndpoint(0).getValue() == value1 and e.getEndpoint(0).getValue() == value0):
+                    return e
+
+        return None
+
     def removeEdge(self, value0, value1) -> bool:
         """
         Removes the first appearance of an Edge which values matches the `value0` and `value1` parameters.
