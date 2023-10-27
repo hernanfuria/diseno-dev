@@ -145,6 +145,20 @@ class Graph:
         Returns True if an Edge was removed, returns False otherwise.
         """
 
+        if self.hasNode(value0) and self.hasNode(value1):
+            idx_to_pop = -1
+            for e_idx, e in enumerate(self.edges):
+                if (e.getEndpoint(0).getValue() == value0 and e.getEndpoint(0).getValue() == value1) or \
+                        (e.getEndpoint(0).getValue() == value1 and e.getEndpoint(0).getValue() == value0):
+                    idx_to_pop = e_idx
+                    break
+
+            if idx_to_pop != -1:
+                self.edges.pop(idx_to_pop)
+                return True
+
+        return False
+
     def __str__(self):
         pass
 
