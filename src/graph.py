@@ -45,6 +45,11 @@ class _Edge:
     def getEndpoint(self, position: int) -> _Node:
         """Returns the Node connected to the edge at the specified `position` (0 or 1)."""
 
+        if position < 0 or position > 1:
+            raise Exception(f"Invalid position {position}, it must be 0 or 1.")
+
+        return self.endpoints[position]
+
     def __str__(self):
         pass
 
