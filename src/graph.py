@@ -160,7 +160,14 @@ class Graph:
         return False
 
     def __str__(self):
-        pass
+        text = 'Nodes:'
+        for n in self.nodes:
+            text += f"\t{n}"
+        text += 'Edges:'
+        for e in self.edges:
+            text += f"\t{e}"
+
+        return text
 
 
 def _tests():
