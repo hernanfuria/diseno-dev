@@ -18,10 +18,10 @@ class _Node:
         return self.value
 
     def __str__(self):
-        pass
+        return self.value
 
     def __eq__(self, other: _Node):
-        pass
+        return self.value == other.value
 
 
 class _Edge:
