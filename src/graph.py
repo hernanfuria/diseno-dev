@@ -113,6 +113,10 @@ class Graph:
     def addEdge(self, value0, value1, weight: int | float = 1):
         """Adds an Edge that connects `value0` and `value1` (if the Nodes exist) with `weight` to the Graph."""
 
+        if self.hasNode(value0) and self.hasNode(value1):
+            edge = _Edge(endpoint0=self.getNode(value0), endpoint1=self.getNode(value1), weight=weight)
+            self.edges.append(edge)
+
     def hasEdge(self, value0, value1, weight: int | float = 1) -> bool:
         """Returns True if the Graph contains an Edge with values `value0` and `value1`, and weight `weight`,
         returns False otherwise."""
