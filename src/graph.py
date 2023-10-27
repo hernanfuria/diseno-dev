@@ -51,10 +51,15 @@ class _Edge:
         return self.endpoints[position]
 
     def __str__(self):
-        pass
+        return f"{self.endpoints[0].getValue()}---< w = {self.weight} >---{self.endpoints[1].getValue()}"
 
     def __eq__(self, other: _Edge):
-        pass
+        comp = [
+            self.endpoints == other.endpoints,
+            self.weight == other.weight
+        ]
+
+        return False not in comp
 
 
 class Graph:
