@@ -3,7 +3,7 @@ from shapely import unary_union
 
 
 class Walker:
-    """"""
+    """Point over the path"""
 
     def __init__(
             self,
@@ -16,9 +16,18 @@ class Walker:
             step_size: float = 1.0,
             reach_dist: float = 1.0
     ):
+        """
+        :param previous: Previous Walker to the one being instatiated
+        :param next: List of Walker objects that are found after this one
+        :param current_pos: shapely Point object, current position of this Walker object
+        :param target: shapely Point object, The location where the walker is trying to reach
+        :param bloquers: List of shapely Point objects, obstacles in the path (not implemented yet)
+        :param path: shapely LineString or MultiLineString object, the path the Walker walks
+        :param step_size: Distance between a Walker object and its next one(s)
+        :param reach_dist: Maximum distance from the target at which the Walker is considered arrived
+        """
+
         # input checks
-        # if not isinstance(previous, Walker):
-        #     raise ValueError(f"previous: {previous} is not a Walker object")
         if not isinstance(current_pos, Point):
             raise ValueError(f"current_pos: {current_pos} is not a Point object")
         if not isinstance(target, Point):
@@ -39,14 +48,25 @@ class Walker:
         self.target_found = False
 
     def get_pos(self):
+        """Returns the current position of the Walker"""
         return self.current_pos
 
     def _matches_previous(self, p: Point) -> bool:
+        """
+
+        :param p: Some Point
+        :return: True if a Point matches the previous Walker's position, False otherwise
+        """
+
         if self.previous is None:
             return False
         return p.distance(self.previous.get_pos()) < (self.reach_dist / 100)
 
-    def _find_next_steps(self):
+    def _find_next_steps(self) -> list:
+        """
+        :return: List of next Walker objects
+        """
+
         # create a ring buffer of current_pos with radius step_size
         ring = self.current_pos.buffer(self.step_size).boundary
 
@@ -78,7 +98,10 @@ class Walker:
         ]
 
     def _walk(self):
-        # print(f"walking at {self}")
+        """
+        Walks recursively the path
+        :return: List containing if target was found (bool), and a list of visited Points
+        """
         # base case: if dist(current_pos, target) < reach_dist, end here (path found)
         if self.current_pos.distance(self.target) <= self.reach_dist:
             self.is_path_end = True
@@ -103,6 +126,10 @@ class Walker:
         return [False, []]
 
     def walk(self):
+        """
+        Finds the path to the target Point
+        :return: List of Points if path found, None otherwise
+        """
         [tf, pos_list] = self._walk()
         if tf:
             return pos_list
