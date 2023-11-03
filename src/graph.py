@@ -18,7 +18,7 @@ class _Node:
         return self.value
 
     def __str__(self):
-        return self.value
+        return str(self.value)
 
     def __eq__(self, other: _Node):
         return self.value == other.value
@@ -105,6 +105,7 @@ class Graph:
                 break
 
         if idx_to_pop != -1:
+            # TO-DO: remove edges connected to Node
             self.nodes.pop(idx_to_pop)
             return True
 
@@ -133,8 +134,9 @@ class Graph:
 
         if self.hasNode(value0) and self.hasNode(value1):
             for e in self.edges:
-                if (e.getEndpoint(0).getValue() == value0 and e.getEndpoint(0).getValue() == value1) or \
-                        (e.getEndpoint(0).getValue() == value1 and e.getEndpoint(0).getValue() == value0):
+                ep0 = e.getEndpoint(0).getValue()
+                ep1 = e.getEndpoint(1).getValue()
+                if (ep0 == value0 and ep1 == value1) or (ep0 == value1 and ep1 == value0):
                     return e
 
         return None
@@ -148,8 +150,9 @@ class Graph:
         if self.hasNode(value0) and self.hasNode(value1):
             idx_to_pop = -1
             for e_idx, e in enumerate(self.edges):
-                if (e.getEndpoint(0).getValue() == value0 and e.getEndpoint(0).getValue() == value1) or \
-                        (e.getEndpoint(0).getValue() == value1 and e.getEndpoint(0).getValue() == value0):
+                ep0 = e.getEndpoint(0).getValue()
+                ep1 = e.getEndpoint(1).getValue()
+                if (ep0 == value0 and ep1 == value1) or (ep0 == value1 and ep1 == value0):
                     idx_to_pop = e_idx
                     break
 
@@ -160,20 +163,36 @@ class Graph:
         return False
 
     def __str__(self):
-        text = 'Nodes:'
+        text = 'Nodes:\n'
         for n in self.nodes:
-            text += f"\t{n}"
-        text += 'Edges:'
+            text += f"\t{n}\n"
+        text += 'Edges:\n'
         for e in self.edges:
-            text += f"\t{e}"
+            text += f"\t{e}\n"
 
         return text
 
 
 def _tests():
     n = _Node(1)
-    print(n)
+    # print(n)
     assert n.getValue() == 1
+
+    g = Graph()
+    g.addNode(2)
+    g.addNode(3)
+    g.addNode(4)
+    g.addNode(5)
+    assert g.hasNode(3)
+    g.addEdge(2, 3, 0.3)
+    g.addEdge(3, 4, 0.7)
+    g.addEdge(3, 5)
+    assert g.hasEdge(2, 3, 0.3)
+    print(g)
+    print(g.getEdge(3, 4))
+    assert g.removeEdge(3, 5)
+    assert g.removeNode(5)
+    print(g)
 
     print("\033[32m _tests executed successfully \033[0m")
 
