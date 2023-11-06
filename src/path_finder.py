@@ -19,7 +19,8 @@ class Walker:
             obstacles: list = None,  # list of Points
             path: MultiLineString = None,
             step_size: float = 1.0,
-            reach_dist: float = 1.0
+            reach_dist: float = 1.0,
+            max_walking_distance: float = 10.0
     ):
         """
         :param previous: Previous Walker to the one being instatiated
@@ -30,6 +31,7 @@ class Walker:
         :param path: shapely LineString or MultiLineString object, the path the Walker walks
         :param step_size: Distance between a Walker object and its next one(s)
         :param reach_dist: Maximum distance from the target at which the Walker is considered arrived
+        :param max_walking_distance: Maximum distance the Walker is able to walk
         """
 
         # input checks
@@ -48,6 +50,7 @@ class Walker:
         self.path = path
         self.step_size = step_size
         self.reach_dist = reach_dist
+        self.max_walking_distance = max_walking_distance
 
         self.is_path_end = False
         self.target_found = False
@@ -127,7 +130,8 @@ class Walker:
                 obstacles=self.obstacles,
                 path=path,
                 step_size=self.step_size,
-                reach_dist=self.reach_dist
+                reach_dist=self.reach_dist,
+                max_walking_distance=self.max_walking_distance - self.step_size
             ) for ns in next_steps
         ]
 
@@ -149,6 +153,13 @@ class Walker:
                 self.is_path_end = True
                 self.target_found = False
                 return [self.target_found, [self.current_pos]]
+
+        # base case: if max_walking_distance < step_size, end here (max distance walked)
+        if self.max_walking_distance < self.step_size:
+            print(f'max distance walked at {self}')
+            self.is_path_end = False
+            self.target_found = False
+            return [self.target_found, [self.current_pos]]
 
         # find next step(s)
         self.next = self._find_next_steps()
@@ -203,7 +214,8 @@ def _tests():
         obstacles=obstacles,
         path=path,
         step_size=0.153,
-        reach_dist=0.153
+        reach_dist=0.153,
+        max_walking_distance=100
     )
     # for ns in w._find_next_steps():
     #     print(ns)
