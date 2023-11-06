@@ -195,7 +195,7 @@ class Walker:
         return f"Walker({self.current_pos.x}, {self.current_pos.y})"
 
 
-def _tests():
+def _test1():
     lines = [
         LineString([(0, 0), (10, 0)]),
         LineString([(10, -1), (10, 11)]),
@@ -239,7 +239,40 @@ def _tests():
     else:
         print('no hay camino')
 
-    print("\033[32m _tests executed successfully \033[0m")
+    print("\033[32m _test1 executed successfully \033[0m")
+
+
+def _test2():
+    strands_gdf = gpd.read_file(join(SHP_PATH, 'Strands.shp'))
+    start_gdf = gpd.read_file(join(SHP_PATH, 'ComplexStart.shp'))
+    target_gdf = gpd.read_file(join(SHP_PATH, 'ComplexTarget.shp'))
+    print(f"\033[32m\tlayers read\033[0m")
+
+    meter = 0.00001
+
+    w = Walker(
+        current_pos=start_gdf.loc[0, 'geometry'],
+        target=target_gdf.loc[0, 'geometry'],
+        obstacles=[],
+        path=unary_union(list(strands_gdf.geometry)),
+        step_size=1 * meter,
+        reach_dist=1 * meter,
+        max_walking_distance=400 * meter
+    )
+
+    walk = w.walk()
+    if walk is not None:
+        print(walk)
+        walk_gdf = gpd.GeoDataFrame({'geometry': [walk]})
+        walk_gdf.to_file(join(SHP_PATH, 'ComplexWalk.shp'))
+        print(f"\033[32m\tComplexWalk.shp saved\033[0m")
+    else:
+        print('no hay camino')
+
+    print("\033[32m _test2 executed successfully \033[0m")
+
+def _tests():
+    _test2()
 
 
 if __name__ == '__main__':
