@@ -175,6 +175,7 @@ class Walker:
         """
         [tf, pos_list] = self._walk()
         if tf:
+            pos_list.append(self.target)
             return LineString(self._remove_redundant_points(pos_list))
 
         return None
