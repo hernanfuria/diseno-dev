@@ -1,5 +1,12 @@
 import geopandas as gpd
-from shapely.ops import Point, MultiPoint, LineString, MultiLineString, GeometryCollection
+from shapely.ops import (
+    Point,
+    MultiPoint,
+    LineString,
+    MultiLineString,
+    GeometryCollection,
+    nearest_points
+)
 from shapely import unary_union
 
 from os.path import join
@@ -271,8 +278,60 @@ def _test2():
 
     print("\033[32m _test2 executed successfully \033[0m")
 
+
+def _test3():
+    naps_gdf = gpd.read_file(join(SHP_PATH, 'SimpleNAPs.shp'))
+    strands_gdf = gpd.read_file(join(SHP_PATH, 'Strands.shp'))
+
+    path = unary_union(list(strands_gdf.geometry))  # MultiLineString
+    naps = [nearest_points(nap, path)[1] for nap in list(naps_gdf.geometry)]  # list of Points
+
+    # test
+    test_gdf = gpd.GeoDataFrame({'geometry': naps})
+    test_gdf.to_file(join(SHP_PATH, 'test.shp'))
+
+    nap_to_nap_max_dist = 200
+    meter = 0.00001
+
+    paths_found = []
+    for s_idx, s in enumerate(naps):  # starting NAP
+        for e_idx, e in enumerate(naps):  # end NAP
+            if s_idx < e_idx and s.distance(e) < nap_to_nap_max_dist * meter:
+                print(f"s: {s_idx} of {len(naps)}, e: {e_idx} of {len(naps)}")
+
+                obstacles = [n for n_idx, n in enumerate(naps) if n_idx not in [s_idx, e_idx]]
+
+                w = Walker(
+                    current_pos=s,
+                    target=e,
+                    obstacles=obstacles,
+                    path=path,
+                    step_size=3 * meter,
+                    reach_dist=3 * meter,
+                    max_walking_distance=nap_to_nap_max_dist * meter
+                )
+
+                walk = w.walk()
+                if walk is not None:
+                    print(walk)
+                    print("\033[32m\tpath found\033[0m")
+                    paths_found.append(walk)
+
+                else:
+                    print('\033[31m\tno path\033[0m')
+
+    if paths_found != []:
+        walk_gdf = gpd.GeoDataFrame({'geometry': paths_found})
+        walk_gdf.to_file(join(SHP_PATH, 'ComplexWalk.shp'))
+        print(f"\033[32m\tComplexWalk.shp saved\033[0m")
+    else:
+        print('\033[31m\tno hay ningun camino\033[0m')
+
+    print("\033[32m _test3 executed successfully \033[0m")
+
+
 def _tests():
-    _test2()
+    _test3()
 
 
 if __name__ == '__main__':
