@@ -67,6 +67,30 @@ class Walker:
             return False
         return p.distance(self.previous.get_pos()) < (self.reach_dist / 100)
 
+    def _remove_redundant_points(self, pos_list: list) -> list:
+        redundant_idx = []
+        for p_idx in range(1, len(pos_list) - 1):
+            p_prev: Point = pos_list[p_idx - 1]
+            p_curr: Point = pos_list[p_idx]
+            p_next: Point = pos_list[p_idx + 1]
+
+            v1 = (p_curr.x - p_prev.x, p_curr.y - p_prev.y)  # p_prev to p_curr
+            v2 = (p_next.x - p_curr.x, p_next.y - p_curr.y)  # p_curr to p_next
+            v2_90 = (v2[1], -1 * v2[0])  # v2 rotated 90 degrees
+
+            scalar_prod = v1[0] * v2_90[0] + v1[1] * v2_90[1]
+
+            # v1 // v2 <=> v1 perp v2 <=> v1 . v2_90 == 0
+            if scalar_prod == 0:
+                redundant_idx.append(p_idx)
+
+        clean_pos_list = []
+        for p_idx, p in enumerate(pos_list):
+            if p_idx not in redundant_idx:
+                clean_pos_list.append(p)
+
+        return clean_pos_list
+
     def _find_next_steps(self) -> list:
         """
         :return: List of next Walker objects
@@ -144,14 +168,14 @@ class Walker:
 
         return [False, []]
 
-    def walk(self):
+    def walk(self) -> LineString:
         """
         Finds the path to the target Point
         :return: List of Points if path found, None otherwise
         """
         [tf, pos_list] = self._walk()
         if tf:
-            return pos_list
+            return LineString(self._remove_redundant_points(pos_list))
 
         return None
 
@@ -184,14 +208,15 @@ def _tests():
     #     print(ns)
     walk = w.walk()
     if walk is not None:
-        for p in walk:
-            print(p)
+        # for p in walk:
+        #     print(p)
+        print(walk)
 
         lines_gdf = gpd.GeoDataFrame({'geometry': lines}, crs="EPSG:4326")
         sp_gdf = gpd.GeoDataFrame({'geometry': [starting_point]})
         tp_gdf = gpd.GeoDataFrame({'geometry': [target_point]})
         o_gdf = gpd.GeoDataFrame({'geometry': obstacles})
-        walk_gdf = gpd.GeoDataFrame({'geometry': walk})
+        walk_gdf = gpd.GeoDataFrame({'geometry': [walk]})
 
         lines_gdf.to_file(join(SHP_PATH, 'lines.shp'))
         sp_gdf.to_file(join(SHP_PATH, 'start.shp'))
