@@ -73,7 +73,8 @@ class Walker:
         """
 
         # create a ring buffer of current_pos with radius step_size
-        ring = self.current_pos.buffer(self.step_size).boundary
+        circle = self.current_pos.buffer(self.step_size)
+        ring = circle.boundary
 
         # find intersections between path and ring
         inter = ring.intersection(self.path)
@@ -90,6 +91,9 @@ class Walker:
                     if not self._matches_previous(p):
                         next_steps.append(p)
 
+        # if there are next steps, the path updates to not include the previous walked sections
+        path = self.path.difference(circle) if next_steps != [] else self.path
+
         # return remaining intersections
         return [
             Walker(
@@ -97,7 +101,7 @@ class Walker:
                 current_pos=ns,
                 target=self.target,
                 obstacles=self.obstacles,
-                path=self.path,
+                path=path,
                 step_size=self.step_size,
                 reach_dist=self.reach_dist
             ) for ns in next_steps
@@ -173,8 +177,8 @@ def _tests():
         target=target_point,
         obstacles=obstacles,
         path=path,
-        step_size=0.1,
-        reach_dist=0.1
+        step_size=0.153,
+        reach_dist=0.153
     )
     # for ns in w._find_next_steps():
     #     print(ns)
