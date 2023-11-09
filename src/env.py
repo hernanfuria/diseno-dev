@@ -6,3 +6,5 @@ ROOT_PATH = getcwd()
 ASSETS_PATH = join(ROOT_PATH, 'assets')
 QGZ_PATH = join(ASSETS_PATH, 'QGZ')
 SHP_PATH = join(ASSETS_PATH, 'SHP')
+
+VENVS_PATH = join(ROOT_PATH, 'venvs')

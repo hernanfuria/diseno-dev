@@ -1,6 +1,6 @@
 from os import mkdir
 from os.path import join, isdir
-from src.env import ROOT_PATH, ASSETS_PATH, QGZ_PATH, SHP_PATH
+from src.env import ASSETS_PATH, QGZ_PATH, SHP_PATH, VENVS_PATH
 
 
 def create_dirs():
@@ -15,3 +15,7 @@ def create_dirs():
     if not isdir(SHP_PATH):
         mkdir(SHP_PATH)
         print(f"{SHP_PATH} \033[32mcreated\033[0m")
+
+    if not isdir(VENVS_PATH):
+        mkdir(VENVS_PATH)
+        print(f"{VENVS_PATH} \033[32mcreated\033[0m")
