@@ -142,31 +142,28 @@ class Walker:
             ) for ns in next_steps
         ]
 
-    def _walk(self):
+    def _walk(self) -> list:
         """
         Walks recursively the path
         :return: List containing if target was found (bool), and a list of visited Points
         """
+        # print(f"Current at {self}")
+
         # base case: if dist(current_pos, target) < reach_dist, end here (path found)
         if self.current_pos.distance(self.target) <= self.reach_dist:
-            self.is_path_end = True
-            self.target_found = True
-            return [self.target_found, [self.current_pos]]
+            print('target found')
+            return [True, [self.current_pos], self.path]
 
         # base case: if dist(current_pos, obstacle) < step_size, end here (path blocked)
         for obstacle in self.obstacles:
             if self.current_pos.distance(obstacle) <= self.step_size:
                 print(f'obstacle at {self}')
-                self.is_path_end = True
-                self.target_found = False
-                return [self.target_found, [self.current_pos]]
+                return [False, [], self.path]
 
         # base case: if max_walking_distance < step_size, end here (max distance walked)
         if self.max_walking_distance < self.step_size:
             print(f'max distance walked at {self}')
-            self.is_path_end = False
-            self.target_found = False
-            return [self.target_found, [self.current_pos]]
+            return [False, [], self.path]
 
         # find next step(s)
         self.next = self._find_next_steps()
@@ -174,24 +171,27 @@ class Walker:
         # base case: if there are no next steps, end here (dead end)
         if self.next == []:
             print(f'dead end at {self}')
-            self.is_path_end = False
-            self.target_found = False
-            return [self.target_found, [self.current_pos]]
+            return [False, [], self.path]
 
-        # call walk() for every next Walker
+        # call _walk() for every next Walker
+        path = None
         for w in self.next:
-            [tf, pos_list] = w._walk()
-            if tf:
-                return [True, [self.current_pos] + pos_list]
+            if path is not None:
+                w.path = path
 
-        return [False, []]
+            [tf, pos_list, path] = w._walk()
+
+            if tf:
+                return [True, [self.current_pos] + pos_list, self.path]
+
+        return [False, [], path]
 
     def walk(self) -> LineString:
         """
         Finds the path to the target Point
         :return: List of Points if path found, None otherwise
         """
-        [tf, pos_list] = self._walk()
+        [tf, pos_list, path] = self._walk()
         if tf:
             pos_list.append(self.target)
             return LineString(self._remove_redundant_points(pos_list))
@@ -204,14 +204,20 @@ class Walker:
 
 def _test1():
     lines = [
-        LineString([(0, 0), (10, 0)]),
-        LineString([(10, -1), (10, 11)]),
-        LineString([(11, 10), (0, 10)]),
-        LineString([(5, -1), (5, 11)]),
+        LineString([(0, 0), (20, 0)]),
+        LineString([(10, -10), (10, 20)]),
+        LineString([(20, 10), (0, 10)]),
+        LineString([(5, -10), (5, 20)]),
     ]
     starting_point = Point(2, 0)
     target_point = Point(0, 10)
-    obstacles = [Point(5, 5)]
+    obstacles = [
+        Point(5, 5),
+        # Point(10, 5),
+        Point(15, 0),
+        Point(5, -5),
+        Point(10, -5),
+    ]
 
     path = unary_union(lines)
 
@@ -224,24 +230,21 @@ def _test1():
         reach_dist=0.153,
         max_walking_distance=100
     )
-    # for ns in w._find_next_steps():
-    #     print(ns)
+
+    lines_gdf = gpd.GeoDataFrame({'geometry': lines}, crs="EPSG:4326")
+    sp_gdf = gpd.GeoDataFrame({'geometry': [starting_point]})
+    tp_gdf = gpd.GeoDataFrame({'geometry': [target_point]})
+    o_gdf = gpd.GeoDataFrame({'geometry': obstacles})
+
+    lines_gdf.to_file(join(SHP_PATH, 'lines.shp'))
+    sp_gdf.to_file(join(SHP_PATH, 'start.shp'))
+    tp_gdf.to_file(join(SHP_PATH, 'target.shp'))
+    o_gdf.to_file(join(SHP_PATH, 'obstacles.shp'))
+
     walk = w.walk()
     if walk is not None:
-        # for p in walk:
-        #     print(p)
         print(walk)
-
-        lines_gdf = gpd.GeoDataFrame({'geometry': lines}, crs="EPSG:4326")
-        sp_gdf = gpd.GeoDataFrame({'geometry': [starting_point]})
-        tp_gdf = gpd.GeoDataFrame({'geometry': [target_point]})
-        o_gdf = gpd.GeoDataFrame({'geometry': obstacles})
         walk_gdf = gpd.GeoDataFrame({'geometry': [walk]})
-
-        lines_gdf.to_file(join(SHP_PATH, 'lines.shp'))
-        sp_gdf.to_file(join(SHP_PATH, 'start.shp'))
-        tp_gdf.to_file(join(SHP_PATH, 'target.shp'))
-        o_gdf.to_file(join(SHP_PATH, 'obstacles.shp'))
         walk_gdf.to_file(join(SHP_PATH, 'walk.shp'))
     else:
         print('no hay camino')
@@ -331,7 +334,7 @@ def _test3():
 
 
 def _tests():
-    _test3()
+    _test1()
 
 
 if __name__ == '__main__':
