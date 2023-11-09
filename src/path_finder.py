@@ -14,12 +14,12 @@ from os.path import join
 from src.env import SHP_PATH
 
 
-class Walker:
+class _Walker:
     """Point over the path"""
 
     def __init__(
             self,
-            previous: 'Walker' = None,
+            previous: '_Walker' = None,
             next: list = None,  # list of Walkers
             current_pos: Point = None,
             target: Point = None,
@@ -130,7 +130,7 @@ class Walker:
 
         # return remaining intersections
         return [
-            Walker(
+            _Walker(
                 previous=self,
                 current_pos=ns,
                 target=self.target,
@@ -199,7 +199,33 @@ class Walker:
         return None
 
     def __str__(self):
-        return f"Walker({self.current_pos.x}, {self.current_pos.y})"
+        return f"_Walker({self.current_pos.x}, {self.current_pos.y})"
+
+
+def path_finder(
+        source: Point, 
+        target: Point, 
+        path: MultiLineString, 
+        obstacles: list = None,
+        step_size: float = 1,
+        max_walking_distance: float = 100
+):
+    """
+    Tries to find the path from source point to target point, 
+    wandering through the path.
+    """
+
+    w = _Walker(
+        current_pos=source,
+        target=target,
+        obstacles=obstacles,
+        path=path,
+        step_size=step_size,
+        reach_dist=step_size,
+        max_walking_distance=max_walking_distance
+    )
+
+    return w.walk()
 
 
 def _test1():
@@ -221,7 +247,7 @@ def _test1():
 
     path = unary_union(lines)
 
-    w = Walker(
+    w = _Walker(
         current_pos=starting_point,
         target=target_point,
         obstacles=obstacles,
@@ -260,7 +286,7 @@ def _test2():
 
     meter = 0.00001
 
-    w = Walker(
+    w = _Walker(
         current_pos=start_gdf.loc[0, 'geometry'],
         target=target_gdf.loc[0, 'geometry'],
         obstacles=[],
@@ -304,7 +330,7 @@ def _test3():
 
                 obstacles = [n for n_idx, n in enumerate(naps) if n_idx not in [s_idx, e_idx]]
 
-                w = Walker(
+                w = _Walker(
                     current_pos=s,
                     target=e,
                     obstacles=obstacles,
