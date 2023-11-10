@@ -1,3 +1,3 @@
 - [x] Move base cases in _Walker to methods
-- [ ] Add a parameter to path_finder function to enable/disable info printing at console
+- [x] Add Logger to _Walker
 - [ ] Test path_finder function
