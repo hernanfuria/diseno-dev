@@ -142,34 +142,69 @@ class _Walker:
             ) for ns in next_steps
         ]
 
-    def _walk(self) -> list:
+    def _base_case_path_found(self) -> bool:
         """
-        Walks recursively the path
-        :return: List containing if target was found (bool), and a list of visited Points
+        If the target is closer that reach_dist to the _Walker, 
+        the path has been found
         """
-        # print(f"Current at {self}")
 
-        # base case: if dist(current_pos, target) < reach_dist, end here (path found)
-        if self.current_pos.distance(self.target) <= self.reach_dist:
-            print('target found')
-            return [True, [self.current_pos], self.path]
+        # base case: if dist(current_pos, target) <= reach_dist, end here (path found)
+        return self.current_pos.distance(self.target) <= self.reach_dist
+
+    def _base_case_path_blocked(self) -> bool:
+        """
+        If an obstacle is closer that step_size to the _Walker, 
+        the path is blocked
+        """
 
         # base case: if dist(current_pos, obstacle) < step_size, end here (path blocked)
         for obstacle in self.obstacles:
             if self.current_pos.distance(obstacle) <= self.step_size:
-                print(f'obstacle at {self}')
-                return [False, [], self.path]
+                return True
+            
+    def _base_case_max_distance_walked(self) -> bool:
+        """
+        If max_walking_distance is smaller that step_size, 
+        the _Walker can't move because the maximum walking 
+        distance has been walked
+        """
 
         # base case: if max_walking_distance < step_size, end here (max distance walked)
-        if self.max_walking_distance < self.step_size:
+        return self.max_walking_distance < self.step_size
+    
+    def _base_case_dead_end(self) -> bool:
+        """
+        If there are no next _Walkers, the current _Walker 
+        has reached a dead end
+        """
+        
+        # base case: if there are no next steps, end here (dead end)
+        return self.next == []
+
+    def _walk(self) -> list:
+        """
+        Walks recursively the path
+        :return: List containing if target was found (bool), 
+            a list of visited Points, and an updated path
+        """
+        # print(f"Current at {self}")
+
+        if self._base_case_path_found():
+            print('target found')
+            return [True, [self.current_pos], self.path]
+
+        if self._base_case_path_blocked():
+            print(f'obstacle at {self}')
+            return [False, [], self.path]
+
+        if self._base_case_max_distance_walked():
             print(f'max distance walked at {self}')
             return [False, [], self.path]
 
         # find next step(s)
         self.next = self._find_next_steps()
 
-        # base case: if there are no next steps, end here (dead end)
-        if self.next == []:
+        if self._base_case_dead_end():
             print(f'dead end at {self}')
             return [False, [], self.path]
 
