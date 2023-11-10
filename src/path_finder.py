@@ -12,6 +12,8 @@ from shapely import unary_union
 from os.path import join
 
 from src.env import SHP_PATH
+from src.clic import red, green, orange, blue, magenta, cyan, light_gray
+from src.logger import Logger
 
 
 class _Walker:
@@ -59,8 +61,7 @@ class _Walker:
         self.reach_dist = reach_dist
         self.max_walking_distance = max_walking_distance
 
-        self.is_path_end = False
-        self.target_found = False
+        self.l = Logger(log_type='cli')
 
     def get_pos(self):
         """Returns the current position of the Walker"""
@@ -187,26 +188,26 @@ class _Walker:
         :return: List containing if target was found (bool), 
             a list of visited Points, and an updated path
         """
-        # print(f"Current at {self}")
-
         if self._base_case_path_found():
-            print('target found')
+            self.l.log(green(f"Target found at {self}"))
             return [True, [self.current_pos], self.path]
 
         if self._base_case_path_blocked():
-            print(f'obstacle at {self}')
+            self.l.log(red(f"Obstacle found at {self}"))
             return [False, [], self.path]
 
         if self._base_case_max_distance_walked():
-            print(f'max distance walked at {self}')
+            self.l.log(red(f"Max distance walked at {self}"))
             return [False, [], self.path]
 
         # find next step(s)
         self.next = self._find_next_steps()
 
         if self._base_case_dead_end():
-            print(f'dead end at {self}')
+            self.l.log(red(f"Dead end at {self}"))
             return [False, [], self.path]
+
+        # self.l.log(light_gray(f"Walking at {self}"))
 
         # call _walk() for every next Walker
         path = None
@@ -234,7 +235,7 @@ class _Walker:
         return None
 
     def __str__(self):
-        return f"_Walker({self.current_pos.x}, {self.current_pos.y})"
+        return f"({self.current_pos.x}, {self.current_pos.y})"
 
 
 def path_finder(
@@ -395,7 +396,7 @@ def _test3():
 
 
 def _tests():
-    _test1()
+    _test3()
 
 
 if __name__ == '__main__':
