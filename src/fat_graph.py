@@ -97,12 +97,13 @@ class FATGraph:
         pass
 
     def __str__(self) -> str:
-        text = ''
-        text += f'{self.fats}\n'
+        text = 'FATGraph\nFATs\n'
+        text += f'\t{self.fats}\n'
+        text += f'edges\n'
         for f1_idx, f1 in enumerate(self.fats):
             for f2_idx, f2 in enumerate(self.fats):
                 data = self.adj_mat[f1_idx][f2_idx]
                 if f1_idx <= f2_idx and data is not None:
-                    text += f'{data}\n'
+                    text += f'\t< {f1} >---{data}---< {f2} >\n'
 
         return text
