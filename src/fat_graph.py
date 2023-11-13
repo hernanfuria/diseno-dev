@@ -16,7 +16,7 @@ class FATGraph:
                 'f1',
                 'f2',
                 {
-                    'weight': 123
+                    'length': 123
                     'linestring': <LineString object>
                 }
             ), 
@@ -24,7 +24,7 @@ class FATGraph:
                 'f2',
                 'f3',
                 {
-                    'weight': 546
+                    'length': 546
                     'linestring': <LineString object>
                 }
             )
@@ -50,7 +50,7 @@ class FATGraph:
                     'f1',
                     'f2',
                     {
-                        'weight': 123
+                        'length': 123
                         'linestring': <LineString object>
                     }
                 )
@@ -88,8 +88,36 @@ class FATGraph:
                 return f_idx
         return -1
 
-    def _get_most_disconnected_fat(self):
-        pass
+    def _get_most_disconnected_fat(self, evaluate_data_key: str, ignore_fats: list = []) -> str:
+        """
+        Evaluates which FAT is the most disconnected from the rest 
+        (ignoring specified FATs), and returns it
+        """
+
+        fat, fat_degree, total_weight = '', len(self.fats) + 1, 0
+
+        for fat_row_idx, fat_row in enumerate(self.fats):
+            if fat_row in ignore_fats:
+                continue
+            
+            d = 0  # fat_row degree count
+            tw = 0  # fat_row total weight sum
+
+            for fat_col_idx, fat_col in enumerate(self.fats):
+                if fat_col in ignore_fats:  # ignore this column
+                    continue
+
+                data = self.adj_mat[fat_row_idx][fat_col_idx]
+                if data is None:  # there's no edge
+                    continue
+
+                d += 1
+                tw += data[evaluate_data_key]
+
+            if (d < fat_degree) or (d == fat_degree and tw > total_weight):
+                fat, fat_degree, total_weight = fat_row, d, tw
+
+        return fat
 
     def _create_group(self):
         pass
