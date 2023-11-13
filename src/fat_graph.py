@@ -31,6 +31,9 @@ class FATGraph:
         self.fats = fats
         self.adj_mat = [[None for _ in fats] for _ in fats]
 
+        for edge in edges:
+            self.insert_edge(edge)
+
     def insert_edge(self, edge: tuple) -> None:
         """
         Inserts an edge in the FAT graph
@@ -65,6 +68,7 @@ class FATGraph:
         """
         :return: True if fat in FATGraph, False otherwise
         """
+
         return fat in self.fats
 
     def _get_index_of_fat(self, fat: str) -> int:
@@ -73,6 +77,7 @@ class FATGraph:
 
         :return: index (int) of parameter fat inside self.fats list
         """
+
         return 0
 
     def _get_most_disconnected_fat(self):
