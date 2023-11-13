@@ -1,3 +1,6 @@
+from src.logger import Logger
+
+
 class FATGraph:
     """"""
 
@@ -33,6 +36,8 @@ class FATGraph:
 
         for edge in edges:
             self.insert_edge(edge)
+
+        self.l = Logger(log_type='cli')
 
     def insert_edge(self, edge: tuple) -> None:
         """
@@ -92,9 +97,10 @@ class FATGraph:
     def group_by_n(self):
         pass
 
-    def _log(self):
+    def _log(self, log: str) -> None:
         """Handles the log"""
-        pass
+        
+        self.l.log(log)
 
     def __str__(self) -> str:
         text = 'FATGraph\nFATs\n'
