@@ -47,13 +47,25 @@ class FATGraph:
                     }
                 )
         """
+
         fat_1, fat_2, data = edge
+
+        if not self.has_fat(fat_1):
+            raise ValueError(f"Can't insert edge because {fat_1} is not in the graph")
+        if not self.has_fat(fat_2):
+            raise ValueError(f"Can't insert edge because {fat_2} is not in the graph")
 
         idx_1 = self._get_index_of_fat(fat_1)
         idx_2 = self._get_index_of_fat(fat_2)
-        
+
         self.adj_mat[idx_1][idx_2] = data
         self.adj_mat[idx_2][idx_1] = data
+
+    def has_fat(self, fat: str) -> bool:
+        """
+        :return: True if fat in FATGraph, False otherwise
+        """
+        return fat in self.fats
 
     def _get_index_of_fat(self, fat: str) -> int:
         """
