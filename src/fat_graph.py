@@ -47,7 +47,13 @@ class FATGraph:
                     }
                 )
         """
-        # fat_1, fat_2, data = edge
+        fat_1, fat_2, data = edge
+
+        idx_1 = self._get_index_of_fat(fat_1)
+        idx_2 = self._get_index_of_fat(fat_2)
+        
+        self.adj_mat[idx_1][idx_2] = data
+        self.adj_mat[idx_2][idx_1] = data
 
     def _get_index_of_fat(self, fat: str) -> int:
         """
