@@ -53,8 +53,35 @@ def _test2():
 
     print(green("_test2 executed successfully"))
 
+def _test3():
+
+    # N 3 N 2 1
+    # 3 N 6 1 2
+    # N 6 N 1 N
+    # 2 1 1 N 8
+    # 1 2 N 8 N
+
+    fatg = FATGraph(
+        fats=['f1', 'f2', 'f3', 'f4', 'f5'],
+        edges=[
+            ('f1', 'f2', {'weight': 3}),
+            ('f1', 'f4', {'weight': 2}),
+            ('f1', 'f5', {'weight': 1}),
+            ('f2', 'f3', {'weight': 6}),
+            ('f2', 'f4', {'weight': 1}),
+            ('f2', 'f5', {'weight': 2}),
+            ('f3', 'f4', {'weight': 1}),
+            ('f4', 'f5', {'weight': 8})
+        ]
+    )
+    print(fatg)
+    print(fatg._get_most_disconnected_fat(evaluate_data_key='weight'))
+    print(fatg._create_group(3, 'weight', 'weight'))
+
+    print(green("_test3 executed successfully"))
+
 def _tests():
-    _test2()
+    _test3()
 
 
 if __name__ == "__main__":

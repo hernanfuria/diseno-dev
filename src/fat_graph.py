@@ -1,4 +1,5 @@
 from src.logger import Logger
+from src.clic import orange
 
 
 class FATGraph:
@@ -119,8 +120,50 @@ class FATGraph:
 
         return fat
 
-    def _create_group(self):
-        pass
+    def _create_group(self, n: int, evaluate_data_key: str, retrieve_data_key: str, ignore_fats: list = []):
+        fats_in_group = [self._get_most_disconnected_fat(evaluate_data_key, ignore_fats)]
+        edges = []
+        
+        while len(fats_in_group) < n:
+            self._log(orange(f"Group in progress {fats_in_group}"))
+            edge_row, edge_col, weight = 0, 0, 0
+            for fat_row in fats_in_group:
+                fat_row_idx = self._get_index_of_fat(fat_row)
+
+                self._log(orange(f"checking row {fat_row}"))
+
+                for fat_col_idx, fat_col in enumerate(self.fats):
+                    self._log(orange(f"checking cols {fat_col}"))
+
+                    if fat_col in ignore_fats + fats_in_group:  # ignore this column
+                        self._log(orange(f"ignored"))
+                        continue
+
+                    data = self.adj_mat[fat_row_idx][fat_col_idx]
+                    if data is None:  # there's no edge
+                        self._log(orange(f"no data"))
+                        continue
+
+                    if weight == 0 or data[evaluate_data_key] < weight:
+                        self._log(orange(f"found new minimum {data[evaluate_data_key]}"))
+                        edge_row, edge_col, weight = fat_row_idx, fat_col_idx, data[evaluate_data_key]
+
+            if weight != 0:
+                fats_in_group.append(self.fats[edge_col])
+                edges.append((edge_row, edge_col))
+                self._log(orange(f"{self.fats[fat_col_idx]}, edge {(edge_row, edge_col)} added to group"))
+            else:  # can't find more fats
+                break
+
+        edges_in_group = []
+        for edge_row, edge_col in edges:
+            data = self.adj_mat[edge_row][edge_col]
+            edges_in_group.append(data[retrieve_data_key])
+
+        return {
+            'fats_in_group': fats_in_group,
+            'edges_in_group': edges_in_group
+        }
 
     def group_by_n(self):
         pass
