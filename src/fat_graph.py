@@ -120,7 +120,17 @@ class FATGraph:
 
         return fat
 
-    def _create_group(self, n: int, evaluate_data_key: str, retrieve_data_key: str, ignore_fats: list = []):
+    def _create_group(self, n: int, evaluate_data_key: str, retrieve_data_key: str, ignore_fats: list = []) -> dict:
+        """
+        Constructs a group of n FATs using evaluate_data_key to minimize weights, 
+        and retrieve_data_key to get the edge information.
+
+        :return: Dict looking like this -> {
+            'fats_in_group': ['f1', 'f2', 'f3', ...]
+            'edges_in_group': [<edge_retrieved_data>, <edge_retrieved_data>, ...]
+        }
+        """
+
         fats_in_group = [self._get_most_disconnected_fat(evaluate_data_key, ignore_fats)]
         edges = []
         
@@ -165,8 +175,40 @@ class FATGraph:
             'edges_in_group': edges_in_group
         }
 
-    def group_by_n(self):
-        pass
+    def group_by_n(self, n: int, evaluate_data_key: str, retrieve_data_key: str) -> list:
+        """
+        Constructs groups of n FATs (max) using evaluate_data_key to minimize weights, 
+        and retrieve_data_key to get the edge information.
+
+        :return: List of dicts looking like this -> [
+            {
+                'fats_in_group': ['f1', 'f2', 'f3', ...]
+                'edges_in_group': [<edge_retrieved_data>, <edge_retrieved_data>, ...]
+            },
+            {
+                'fats_in_group': ['f4', 'f5', 'f6', ...]
+                'edges_in_group': [<edge_retrieved_data>, <edge_retrieved_data>, ...]
+            },
+            ...
+        ]
+        """
+
+        ignore_fats = []
+        groups = []
+
+        all_grouped = False
+        while not all_grouped:
+            group = self._create_group(n, evaluate_data_key, retrieve_data_key, ignore_fats)
+            groups.append(group)
+
+            ignore_fats += group['fats_in_group']
+            all_grouped = True
+            for fat in self.fats:
+                if fat not in ignore_fats:
+                    all_grouped = False
+                    break
+
+        return groups
 
     def _log(self, log: str) -> None:
         """Handles the log"""
