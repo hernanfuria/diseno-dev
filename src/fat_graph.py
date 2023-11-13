@@ -73,12 +73,15 @@ class FATGraph:
 
     def _get_index_of_fat(self, fat: str) -> int:
         """
-        Returns index of FAT
+        Returns index of FAT, returns -1 if not found
 
         :return: index (int) of parameter fat inside self.fats list
         """
 
-        return 0
+        for f_idx, f in enumerate(self.fats):
+            if f == fat:
+                return f_idx
+        return -1
 
     def _get_most_disconnected_fat(self):
         pass
@@ -92,3 +95,14 @@ class FATGraph:
     def _log(self):
         """Handles the log"""
         pass
+
+    def __str__(self) -> str:
+        text = ''
+        text += f'{self.fats}\n'
+        for f1_idx, f1 in enumerate(self.fats):
+            for f2_idx, f2 in enumerate(self.fats):
+                data = self.adj_mat[f1_idx][f2_idx]
+                if f1_idx <= f2_idx and data is not None:
+                    text += f'{data}\n'
+
+        return text
