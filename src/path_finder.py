@@ -189,22 +189,22 @@ class _Walker:
             a list of visited Points, and an updated path
         """
         if self._base_case_path_found():
-            self.l.log(green(f"Target found at {self}"))
+            self._log(green(f"Target found at {self}"))
             return [True, [self.current_pos], self.path]
 
         if self._base_case_path_blocked():
-            self.l.log(red(f"Obstacle found at {self}"))
+            self._log(red(f"Obstacle found at {self}"))
             return [False, [], self.path]
 
         if self._base_case_max_distance_walked():
-            self.l.log(red(f"Max distance walked at {self}"))
+            self._log(red(f"Max distance walked at {self}"))
             return [False, [], self.path]
 
         # find next step(s)
         self.next = self._find_next_steps()
 
         if self._base_case_dead_end():
-            self.l.log(red(f"Dead end at {self}"))
+            self._log(red(f"Dead end at {self}"))
             return [False, [], self.path]
 
         # self.l.log(light_gray(f"Walking at {self}"))
@@ -233,6 +233,11 @@ class _Walker:
             return LineString(self._remove_redundant_points(pos_list))
 
         return None
+
+    def _log(self, log: str) -> None:
+        """Handles the log"""
+        
+        self.l.log(log)
 
     def __str__(self):
         return f"({self.current_pos.x}, {self.current_pos.y})"
