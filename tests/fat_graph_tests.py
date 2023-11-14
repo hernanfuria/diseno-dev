@@ -1,5 +1,18 @@
-from src.fat_graph import FATGraph
+import geopandas as gpd
+from shapely.ops import (
+    Point,
+    MultiPoint,
+    LineString,
+    MultiLineString,
+    GeometryCollection,
+    nearest_points
+)
+from shapely import unary_union
 
+from os.path import join
+
+from src.env import SHP_PATH
+from src.fat_graph import FATGraph
 from src.clic import red, green, orange
 
 
@@ -107,8 +120,47 @@ def _test4():
 
     print(green("_test4 executed successfully"))
 
+def _test5():
+    fats_gdf: gpd.GeoDataFrame = gpd.read_file(join(SHP_PATH, 'FATs (FATGraph testing).shp'))
+    lats_gdf: gpd.GeoDataFrame = gpd.read_file(join(SHP_PATH, 'Lat (FATGraph testing).shp'))
+
+    fats = [fats_gdf.loc[i, 'Numero_FAT'] for i in range(fats_gdf.index.size)]
+    edges = []
+
+    for lat_idx, lat_row in lats_gdf.iterrows():
+        print(f"Checking lat {lat_idx}")
+        lat: LineString = lat_row['geometry']
+        e = []
+        for fat_idx, fat_row in fats_gdf.iterrows():
+            print(f"\tChecking fat {fat_idx}")
+            fat: Point = fat_row['geometry']
+            fat_name: str = fat_row['Numero_FAT']
+            if fat.distance(Point(lat.coords[0])) < 0.00001 * 0.1 or fat.distance(Point(lat.coords[-1])) < 0.00001 * 0.1:
+                e.append(fat_name)
+            if len(e) == 2:
+                e.append({'weight': lat.length, 'linestring': lat})
+                break
+        edges.append(tuple(e))
+
+    print(green(fats))
+    for edge in edges:
+        print(green(edge))
+
+    fatg = FATGraph(fats=fats, edges=edges)
+    output_lats = []
+    groups = fatg.group_by_n(n=4, evaluate_data_key='weight', retrieve_data_key='linestring')
+    for group in groups:
+        edges_in_group = group['edges_in_group']
+        for eig in edges_in_group:
+            output_lats.append(eig)
+
+    output_lats_gdf = gpd.GeoDataFrame({'geometry': output_lats}, crs=lats_gdf.crs)
+    output_lats_gdf.to_file(join(SHP_PATH, 'GroupLat (FATGraph testing).shp'))
+
+    print(green("_test5 executed successfully"))
+
 def _tests():
-    _test4()
+    _test5()
 
 
 if __name__ == "__main__":
