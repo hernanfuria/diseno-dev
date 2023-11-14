@@ -7,7 +7,7 @@ from shapely.ops import (
     GeometryCollection,
     nearest_points
 )
-from shapely import unary_union
+from shapely import unary_union, intersection
 
 from os.path import join
 
@@ -97,7 +97,7 @@ def _test2():
 
 
 def _test3():
-    naps_gdf = gpd.read_file(join(SHP_PATH, 'SimpleNAPs.shp'))
+    naps_gdf = gpd.read_file(join(SHP_PATH, 'NAPs.shp'))
     strands_gdf = gpd.read_file(join(SHP_PATH, 'Strands.shp'))
 
     path = unary_union(list(strands_gdf.geometry))  # MultiLineString
@@ -117,12 +117,13 @@ def _test3():
                 print(f"s: {s_idx} of {len(naps)}, e: {e_idx} of {len(naps)}")
 
                 obstacles = [n for n_idx, n in enumerate(naps) if n_idx not in [s_idx, e_idx]]
+                near_path = intersection(path, s.buffer(nap_to_nap_max_dist * meter))
 
                 w = _Walker(
                     current_pos=s,
                     target=e,
                     obstacles=obstacles,
-                    path=path,
+                    path=near_path,
                     step_size=3 * meter,
                     reach_dist=3 * meter,
                     max_walking_distance=nap_to_nap_max_dist * meter

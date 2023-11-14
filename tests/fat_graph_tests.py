@@ -121,20 +121,23 @@ def _test4():
     print(green("_test4 executed successfully"))
 
 def _test5():
-    fats_gdf: gpd.GeoDataFrame = gpd.read_file(join(SHP_PATH, 'FATs (FATGraph testing).shp'))
-    lats_gdf: gpd.GeoDataFrame = gpd.read_file(join(SHP_PATH, 'Lat (FATGraph testing).shp'))
+    fats_gdf: gpd.GeoDataFrame = gpd.read_file(join(SHP_PATH, 'NAPs.shp'))
+    lats_gdf: gpd.GeoDataFrame = gpd.read_file(join(SHP_PATH, 'ComplexWalk.shp'))
+    strands_gdf: gpd.GeoDataFrame = gpd.read_file(join(SHP_PATH, 'Strands.shp'))
 
-    fats = [fats_gdf.loc[i, 'Numero_FAT'] for i in range(fats_gdf.index.size)]
+    path = unary_union(list(strands_gdf.geometry))
+
+    fats = [fats_gdf.loc[i, 'Numero_NAP'] for i in range(fats_gdf.index.size)]
     edges = []
 
     for lat_idx, lat_row in lats_gdf.iterrows():
-        print(f"Checking lat {lat_idx}")
+        print(f"Checking lat {lat_idx} of {lats_gdf.index.size}")
         lat: LineString = lat_row['geometry']
         e = []
         for fat_idx, fat_row in fats_gdf.iterrows():
-            print(f"\tChecking fat {fat_idx}")
-            fat: Point = fat_row['geometry']
-            fat_name: str = fat_row['Numero_FAT']
+            # print(f"\tChecking fat {fat_idx}")
+            fat: Point = nearest_points(fat_row['geometry'], path)[1]
+            fat_name: str = fat_row['Numero_NAP']
             if fat.distance(Point(lat.coords[0])) < 0.00001 * 0.1 or fat.distance(Point(lat.coords[-1])) < 0.00001 * 0.1:
                 e.append(fat_name)
             if len(e) == 2:
@@ -148,14 +151,14 @@ def _test5():
 
     fatg = FATGraph(fats=fats, edges=edges)
     output_lats = []
-    groups = fatg.group_by_n(n=4, evaluate_data_key='weight', retrieve_data_key='linestring')
+    groups = fatg.group_by_n(n=8, evaluate_data_key='weight', retrieve_data_key='linestring')
     for group in groups:
         edges_in_group = group['edges_in_group']
         for eig in edges_in_group:
             output_lats.append(eig)
 
     output_lats_gdf = gpd.GeoDataFrame({'geometry': output_lats}, crs=lats_gdf.crs)
-    output_lats_gdf.to_file(join(SHP_PATH, 'GroupLat (FATGraph testing).shp'))
+    output_lats_gdf.to_file(join(SHP_PATH, 'muestra agus.shp'))
 
     print(green("_test5 executed successfully"))
 
