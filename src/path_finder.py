@@ -102,6 +102,44 @@ class _Walker:
 
         return clean_pos_list
 
+    def _sort_next_steps(self, unsorted_next_steps: list) -> list:
+        """"""
+
+        if len(unsorted_next_steps) == 1:
+            return unsorted_next_steps
+
+        scalar_products = []
+
+        # current pos to target versor
+        ct_versor_x = self.target.x - self.current_pos.x
+        ct_versor_y = self.target.y - self.current_pos.y
+        ct_versor_mod = ((ct_versor_x ** 2) + (ct_versor_y ** 2)) ** 0.5
+        ct_versor = (ct_versor_x / ct_versor_mod, ct_versor_y, ct_versor_mod)
+
+        for uns in unsorted_next_steps:
+            # current pos to unsorted next step versor
+            cuns_versor_x = uns.x - self.current_pos.x
+            cuns_versor_y = uns.y - self.current_pos.y
+            cuns_versor_mod = ((cuns_versor_x ** 2) + (cuns_versor_y ** 2)) ** 0.5
+            cuns_versor = (cuns_versor_x / cuns_versor_mod, cuns_versor_y, cuns_versor_mod)
+
+            scalar_product = (ct_versor[0] * cuns_versor[0]) + (ct_versor[1] * cuns_versor[1])
+            scalar_products.append(scalar_product)
+
+        sorted_scalar_products = [sc for sc in scalar_products]
+        sorted_scalar_products.sort()
+
+        sorted_indexes = []
+        for ssp in sorted_scalar_products:
+            for sp_idx, sp in enumerate(scalar_products):
+                if sp == ssp and sp_idx not in sorted_indexes:
+                    sorted_indexes.append(sp_idx)
+
+        sorted_next_steps = []
+        for i in sorted_indexes:
+            sorted_next_steps.append(unsorted_next_steps[i])
+        return sorted_next_steps
+
     def _find_next_steps(self) -> list:
         """
         :return: List of next Walker objects
@@ -120,11 +158,12 @@ class _Walker:
             if not self._matches_previous(inter):
                 next_steps = [inter]
         if isinstance(inter, MultiPoint) or isinstance(inter, GeometryCollection):
-            next_steps = []
+            unsorted_next_steps = []
             for p in list(inter.geoms):
                 if isinstance(p, Point):
                     if not self._matches_previous(p):
-                        next_steps.append(p)
+                        unsorted_next_steps.append(p)
+            next_steps = self._sort_next_steps(unsorted_next_steps)
 
         # if there are next steps, the path updates to not include the previous walked sections
         path = self.path.difference(circle) if next_steps != [] else self.path
