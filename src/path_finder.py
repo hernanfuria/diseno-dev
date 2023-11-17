@@ -103,7 +103,12 @@ class _Walker:
         return clean_pos_list
 
     def _sort_next_steps(self, unsorted_next_steps: list) -> list:
-        """"""
+        """
+        sort next steps depending on how much the 
+        current_pos-next_step versor aligns with the current_pos-target one.
+        If a next step points in the direction f the target, it should be 
+        evaluated with more priority.
+        """
 
         if len(unsorted_next_steps) == 1:
             return unsorted_next_steps
