@@ -107,7 +107,7 @@ def _test3():
     test_gdf = gpd.GeoDataFrame({'geometry': naps})
     test_gdf.to_file(join(SHP_PATH, 'test.shp'))
 
-    nap_to_nap_max_dist = 200
+    nap_to_nap_max_dist = 500
     meter = 0.00001
 
     paths_found = []
@@ -131,7 +131,7 @@ def _test3():
 
                 walk = w.walk()
                 if walk is not None:
-                    print(walk)
+                    # print(walk)
                     print(green("\tpath found"))
                     paths_found.append(walk)
 

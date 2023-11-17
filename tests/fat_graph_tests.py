@@ -143,7 +143,8 @@ def _test5():
             if len(e) == 2:
                 e.append({'weight': lat.length, 'linestring': lat})
                 break
-        edges.append(tuple(e))
+        if len(e) == 3:
+            edges.append(tuple(e))
 
     print(green(fats))
     for edge in edges:
@@ -151,14 +152,14 @@ def _test5():
 
     fatg = FATGraph(fats=fats, edges=edges)
     output_lats = []
-    groups = fatg.group_by_n(n=8, evaluate_data_key='weight', retrieve_data_key='linestring')
+    groups = fatg.group_by_n(n=16, evaluate_data_key='weight', retrieve_data_key='linestring')
     for group in groups:
         edges_in_group = group['edges_in_group']
         for eig in edges_in_group:
             output_lats.append(eig)
 
     output_lats_gdf = gpd.GeoDataFrame({'geometry': output_lats}, crs=lats_gdf.crs)
-    output_lats_gdf.to_file(join(SHP_PATH, 'muestra agus.shp'))
+    output_lats_gdf.to_file(join(SHP_PATH, 'GroupTest.shp'))
 
     print(green("_test5 executed successfully"))
 
