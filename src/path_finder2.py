@@ -22,12 +22,16 @@ class _SegmentWalker:
             total_path: list[LineString], 
             walked_path: list[LineString], 
             current_pos: Point,
+            targets: list[Point],
+            target_found: bool = False,
             tolerance: float | int = 0.1
     ) -> None:
         self._total_path = total_path
         self._walked_path = walked_path
         self._current_pos = current_pos
-        self.tolerance = tolerance
+        self._targets = targets
+        self._target_found = target_found
+        self._tolerance = tolerance
 
     def _get_opposite_end(self, line: LineString) -> Point | None:
         """
@@ -35,18 +39,36 @@ class _SegmentWalker:
         returns the other end. Returns None otherwise.
         """
 
-        if self._current_pos.distance(line.coords[0]) <= self.tolerance:
+        if self._current_pos.distance(line.coords[0]) <= self._tolerance:
             return Point(line.coords[-1])
         
-        if self._current_pos.distance(line.coords[-1]) <= self.tolerance:
+        if self._current_pos.distance(line.coords[-1]) <= self._tolerance:
             return Point(line.coords[0])
         
         return None
 
+    def _check_target_found(self) -> None:
+        """
+        Checks if the current position matches a target and 
+        updates self.target_found
+        """
+
+        for target in self._targets:
+            if self._current_pos.distance(target) <= self._tolerance:
+                self._target_found = True
+                return
+            
+        self._target_found = False
+        
     def get_next_walkers(self) -> list:
         """
         Returns a list of the next walkers with the accumulated walked path.
         """
+
+        if not self._target_found:
+            self._check_target_found()
+        if self._target_found:
+            return []
 
         next_walkers = []
         for line in self._total_path:
@@ -58,7 +80,9 @@ class _SegmentWalker:
                             total_path=self._total_path,
                             walked_path=self._walked_path + line,
                             current_pos=opposite_end,
-                            tolerance=self.tolerance
+                            targets=self._targets,
+                            target_found=False,
+                            tolerance=self._tolerance
                         )
                     )
         
