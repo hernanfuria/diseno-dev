@@ -35,6 +35,14 @@ class _SegmentWalker:
         returns the other end. Returns None otherwise.
         """
 
+        if self._current_pos.distance(line.coords[0]) <= self.tolerance:
+            return Point(line.coords[-1])
+        
+        if self._current_pos.distance(line.coords[-1]) <= self.tolerance:
+            return Point(line.coords[0])
+        
+        return None
+
     def get_next_walkers(self) -> list:
         """
         Returns a list of the next walkers with the accumulated walked path.
