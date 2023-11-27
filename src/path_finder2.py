@@ -87,3 +87,12 @@ class _SegmentWalker:
                     )
         
         return next_walkers
+    
+class _Walk:
+    """"""
+
+    def __init__(self) -> None:
+        pass
+
+    def walk(self):
+        """Manages _SegmentWalker(s) to find all posible paths to targets"""
