@@ -33,6 +33,12 @@ class _SegmentWalker:
         self._target_found = target_found
         self._tolerance = tolerance
 
+    def get_target_found(self) -> bool:
+        return self._target_found
+
+    def get_walked_path(self) -> list:
+        return self._walked_path
+
     def _get_opposite_end(self, line: LineString) -> Point | None:
         """
         If self._current_pos matches an end of the parameter line, 
@@ -63,12 +69,15 @@ class _SegmentWalker:
     def get_next_walkers(self) -> list:
         """
         Returns a list of the next walkers with the accumulated walked path.
+        If the path can continue, the list contains 1 or more walkers.
+        If a target was found, the returned list contains the current walker.
+        If there is no next walkers (dead end), an empty list is returned.
         """
 
         if not self._target_found:
             self._check_target_found()
         if self._target_found:
-            return []
+            return [self]
 
         next_walkers = []
         for line in self._total_path:
@@ -91,8 +100,48 @@ class _SegmentWalker:
 class _Walk:
     """"""
 
-    def __init__(self) -> None:
-        pass
+    def __init__(
+            self,
+            source: Point,
+            path: list[LineString],
+            targets: list[Point],
+            tolerance: float | int = 0.1
+    ) -> None:
+        self._source = source
+        self._path = path
+        self._targets = targets
+        self._tolerance = tolerance
+
+    def _path_can_be_walked(self, walkers: list[_SegmentWalker]) -> bool:
+        """Returns True if there are walkers which have not reached a target."""
+
+        for walker in walkers:
+            if not walker.get_target_found():
+                return True
+        
+        return False
 
     def walk(self):
         """Manages _SegmentWalker(s) to find all posible paths to targets"""
+
+        walkers = [
+            _SegmentWalker(  # source walker
+                total_path=self._path,
+                walked_path=[],
+                current_pos=self._source,
+                targets=self._targets,
+                target_found=False,
+                tolerance=self._tolerance
+            )
+        ]
+
+        while self._path_can_be_walked(walkers):
+            old_walkers = [walker for walker in walkers]
+            walkers = []
+            for old_walker in old_walkers:
+                walkers += old_walker.get_next_walkers()
+
+        return [walker.get_walked_path() for walker in walkers]
+
+
+
