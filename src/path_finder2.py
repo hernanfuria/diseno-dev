@@ -39,3 +39,19 @@ class _SegmentWalker:
         """
         Returns a list of the next walkers with the accumulated walked path.
         """
+
+        next_walkers = []
+        for line in self._total_path:
+            if line not in self._walked_path:
+                opposite_end = self._get_opposite_end(line)
+                if opposite_end is not None:
+                    next_walkers.append(
+                        _SegmentWalker(
+                            total_path=self._total_path,
+                            walked_path=self._walked_path + line,
+                            current_pos=opposite_end,
+                            tolerance=self.tolerance
+                        )
+                    )
+        
+        return next_walkers
