@@ -24,7 +24,8 @@ class _SegmentWalker:
             current_pos: Point,
             targets: list[Point],
             target_found: bool = False,
-            tolerance: float | int = 0.1
+            tolerance: float | int = 0.1,
+            forbidden_path: list[LineString] = []
     ) -> None:
         self._total_path = total_path
         self._walked_path = walked_path
@@ -32,12 +33,16 @@ class _SegmentWalker:
         self._targets = targets
         self._target_found = target_found
         self._tolerance = tolerance
+        self._forbidden_path = forbidden_path
 
     def get_target_found(self) -> bool:
         return self._target_found
 
     def get_walked_path(self) -> list:
         return self._walked_path
+
+    def set_forbidden_path(self, forbidden_path: list[LineString]) -> None:
+        self._forbidden_path = forbidden_path
 
     def _get_opposite_end(self, line: LineString) -> Point | None:
         """
@@ -81,7 +86,7 @@ class _SegmentWalker:
 
         next_walkers = []
         for line in self._total_path:
-            if line not in self._walked_path:
+            if line not in self._walked_path + self._forbidden_path:
                 opposite_end = self._get_opposite_end(line)
                 if opposite_end is not None:
                     next_walkers.append(
@@ -136,10 +141,19 @@ class _Walk:
         ]
 
         while self._path_can_be_walked(walkers):
+            # find next walkers
             old_walkers = [walker for walker in walkers]
             walkers = []
             for old_walker in old_walkers:
                 walkers += old_walker.get_next_walkers()
+
+            # share walked path so no path is walked more than once
+            forbidden_path = []
+            for walker in walkers:
+                walker: _SegmentWalker
+                forbidden_path += walker.get_walked_path()
+            for walker in walkers:
+                walker.set_forbidden_path(forbidden_path)
 
         return [walker.get_walked_path() for walker in walkers]
 
