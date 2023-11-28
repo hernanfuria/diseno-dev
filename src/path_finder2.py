@@ -13,6 +13,8 @@ from shapely import unary_union
 
 from os.path import join
 
+from src.clic import red, green, orange, magenta
+
 
 class _SegmentWalker:
     """"""
@@ -50,10 +52,10 @@ class _SegmentWalker:
         returns the other end. Returns None otherwise.
         """
 
-        if self._current_pos.distance(line.coords[0]) <= self._tolerance:
+        if self._current_pos.distance(Point(line.coords[0])) <= self._tolerance:
             return Point(line.coords[-1])
         
-        if self._current_pos.distance(line.coords[-1]) <= self._tolerance:
+        if self._current_pos.distance(Point(line.coords[-1])) <= self._tolerance:
             return Point(line.coords[0])
         
         return None
@@ -92,7 +94,7 @@ class _SegmentWalker:
                     next_walkers.append(
                         _SegmentWalker(
                             total_path=self._total_path,
-                            walked_path=self._walked_path + line,
+                            walked_path=self._walked_path + [line],
                             current_pos=opposite_end,
                             targets=self._targets,
                             target_found=False,
@@ -101,6 +103,12 @@ class _SegmentWalker:
                     )
         
         return next_walkers
+    
+    def __str__(self) -> str:
+        if self.get_target_found():
+            return green(f"SW({self._current_pos}, wpl={len(self._walked_path)})")
+        
+        return magenta(f"SW({self._current_pos}, wpl={len(self._walked_path)})")
     
 class _Walk:
     """"""
@@ -126,7 +134,7 @@ class _Walk:
         
         return False
 
-    def walk(self):
+    def walk(self) -> list[list]:
         """Manages _SegmentWalker(s) to find all posible paths to targets"""
 
         walkers = [
@@ -141,6 +149,16 @@ class _Walk:
         ]
 
         while self._path_can_be_walked(walkers):
+            # only for report
+            report_text = '['
+            for walker in walkers:
+                report_text += f"{walker}, "
+            if len(report_text) > 1:
+                report_text = report_text[:-2] + ']'
+            else:
+                report_text = '[]'
+            print(report_text)
+
             # find next walkers
             old_walkers = [walker for walker in walkers]
             walkers = []
@@ -154,6 +172,16 @@ class _Walk:
                 forbidden_path += walker.get_walked_path()
             for walker in walkers:
                 walker.set_forbidden_path(forbidden_path)
+
+        # only for report
+            report_text = '['
+            for walker in walkers:
+                report_text += f"{walker}, "
+            if len(report_text) > 1:
+                report_text = report_text[:-2] + ']'
+            else:
+                report_text = '[]'
+            print(report_text)
 
         return [walker.get_walked_path() for walker in walkers]
 
