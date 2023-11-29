@@ -235,4 +235,27 @@ class _Walk:
         return [walker.get_clean_path() for walker in walkers]
 
 
+def path_finder(
+        source: Point,
+        path: list[LineString],
+        targets: list[Point],
+        tolerance: float | int = 0.1   
+) -> list[LineString]:
+    """
+    Tries to find the path from source point to target point, 
+    wandering through the path.
+    """
+
+    w = _Walk(
+        source=source,
+        path=path,
+        targets=targets,
+        tolerance=tolerance
+    )
+
+    return w.walk()
+
+
+if __name__ == '__main__':
+    print(orange('path_finder2.py executed directly'))
 

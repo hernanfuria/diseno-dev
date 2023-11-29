@@ -12,7 +12,7 @@ from shapely import unary_union, intersection
 from os.path import join
 
 from src.env import SHP_PATH
-from src.path_finder2 import _SegmentWalker, _Walk
+from src.path_finder2 import _SegmentWalker, _Walk, path_finder
 from src.clic import red, green, orange
 
 
@@ -51,13 +51,19 @@ def _test1():
 
     # find paths
     meter = 0.00001
-    w = _Walk(
+    # w = _Walk(
+    #     source=source,
+    #     path=path,
+    #     targets=targets,
+    #     tolerance=meter * 0.5
+    # )
+    # paths_found = w.walk()
+    paths_found = path_finder(
         source=source,
         path=path,
         targets=targets,
         tolerance=meter * 0.5
     )
-    paths_found = w.walk()
     print(green('walk ended'))
 
     # export paths found to shp
