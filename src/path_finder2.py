@@ -134,6 +134,16 @@ class _Walk:
         
         return False
 
+    def _report_walkers(self, walkers: list[_SegmentWalker]) -> None:
+        report_text = '['
+        for walker in walkers:
+            report_text += f"{walker}, "
+        if len(report_text) > 1:
+            report_text = report_text[:-2] + ']'
+        else:
+            report_text = '[]'
+        print(report_text)
+
     def walk(self) -> list[list]:
         """Manages _SegmentWalker(s) to find all posible paths to targets"""
 
@@ -149,15 +159,7 @@ class _Walk:
         ]
 
         while self._path_can_be_walked(walkers):
-            # only for report
-            report_text = '['
-            for walker in walkers:
-                report_text += f"{walker}, "
-            if len(report_text) > 1:
-                report_text = report_text[:-2] + ']'
-            else:
-                report_text = '[]'
-            print(report_text)
+            self._report_walkers(walkers)
 
             # find next walkers
             old_walkers = [walker for walker in walkers]
@@ -173,15 +175,7 @@ class _Walk:
             for walker in walkers:
                 walker.set_forbidden_path(forbidden_path)
 
-        # only for report
-            report_text = '['
-            for walker in walkers:
-                report_text += f"{walker}, "
-            if len(report_text) > 1:
-                report_text = report_text[:-2] + ']'
-            else:
-                report_text = '[]'
-            print(report_text)
+        self._report_walkers(walkers)
 
         return [walker.get_walked_path() for walker in walkers]
 
