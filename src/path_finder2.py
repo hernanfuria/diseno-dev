@@ -14,6 +14,7 @@ from shapely import unary_union
 from os.path import join
 
 from src.clic import red, green, orange, magenta
+from src.logger import Logger
 
 
 class _SegmentWalker:
@@ -173,6 +174,13 @@ class _Walk:
         self._targets = targets
         self._tolerance = tolerance
 
+        self.l = Logger(log_type='cli')
+
+    def _log(self, log: str) -> None:
+        """Handles the log"""
+        
+        self.l.log(log)
+
     def _path_can_be_walked(self, walkers: list[_SegmentWalker]) -> bool:
         """Returns True if there are walkers which have not reached a target."""
 
@@ -183,10 +191,10 @@ class _Walk:
         return False
 
     def _report_walkers(self, walkers: list[_SegmentWalker], iteration: int) -> None:
-        print(f"Iteration: {iteration}")
+        self._log(f"Iteration: {iteration}")
         for walker in walkers:
-            print(walker)
-        print(' ')
+            self._log(walker)
+        self._log(' ')
 
     def walk(self) -> list[LineString]:
         """Manages _SegmentWalker(s) to find all posible paths to targets"""

@@ -37,7 +37,7 @@ def _test1():
     path_ends = unary_union(path_ends)
 
     print("\tsnapping")
-    s_name = 'F43'
+    s_name = 'F103'
     s = list(fats_gdf[fats_gdf['Numero_NAP'] == s_name]['geometry'])[0]
     t_list = list(fats_gdf[fats_gdf['Numero_NAP'] != s_name]['geometry'])
 
