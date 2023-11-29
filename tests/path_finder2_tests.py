@@ -37,8 +37,9 @@ def _test1():
     path_ends = unary_union(path_ends)
 
     print("\tsnapping")
-    s = list(fats_gdf[fats_gdf['Numero_NAP'] == 'F212']['geometry'])[0]
-    t_list = list(fats_gdf[fats_gdf['Numero_NAP'] != 'F212']['geometry'])
+    s_name = 'F43'
+    s = list(fats_gdf[fats_gdf['Numero_NAP'] == s_name]['geometry'])[0]
+    t_list = list(fats_gdf[fats_gdf['Numero_NAP'] != s_name]['geometry'])
 
     source = nearest_points(path_ends, s)[0]
     targets = []

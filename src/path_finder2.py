@@ -105,10 +105,13 @@ class _SegmentWalker:
         return next_walkers
     
     def __str__(self) -> str:
+        x = round(self._current_pos.x, 5)
+        y = round(self._current_pos.y, 5)
+
         if self.get_target_found():
-            return green(f"SW({self._current_pos}, wpl={len(self._walked_path)})")
+            return green(f"SW({x}, {y}, wpl={len(self._walked_path)})")
         
-        return magenta(f"SW({self._current_pos}, wpl={len(self._walked_path)})")
+        return magenta(f"SW({x}, {y}, wpl={len(self._walked_path)})")
     
 class _Walk:
     """"""
@@ -134,15 +137,11 @@ class _Walk:
         
         return False
 
-    def _report_walkers(self, walkers: list[_SegmentWalker]) -> None:
-        report_text = '['
+    def _report_walkers(self, walkers: list[_SegmentWalker], iteration: int) -> None:
+        print(f"Iteration: {iteration}")
         for walker in walkers:
-            report_text += f"{walker}, "
-        if len(report_text) > 1:
-            report_text = report_text[:-2] + ']'
-        else:
-            report_text = '[]'
-        print(report_text)
+            print(walker)
+        print(' ')
 
     def walk(self) -> list[list]:
         """Manages _SegmentWalker(s) to find all posible paths to targets"""
@@ -158,8 +157,10 @@ class _Walk:
             )
         ]
 
+        iteration = 0
         while self._path_can_be_walked(walkers):
-            self._report_walkers(walkers)
+            iteration += 1
+            self._report_walkers(walkers, iteration)
 
             # find next walkers
             old_walkers = [walker for walker in walkers]
@@ -175,7 +176,7 @@ class _Walk:
             for walker in walkers:
                 walker.set_forbidden_path(forbidden_path)
 
-        self._report_walkers(walkers)
+        self._report_walkers(walkers, -1)
 
         return [walker.get_walked_path() for walker in walkers]
 
