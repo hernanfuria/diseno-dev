@@ -17,7 +17,7 @@ from src.clic import red, green, orange, magenta
 
 
 class _SegmentWalker:
-    """"""
+    """Walker point over the path"""
 
     def __init__(
             self, 
@@ -159,7 +159,7 @@ class _SegmentWalker:
         return magenta(f"SW({x}, {y}, wpl={len(self._walked_path)})")
     
 class _Walk:
-    """"""
+    """Walk manager"""
 
     def __init__(
             self,
