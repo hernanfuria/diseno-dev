@@ -51,6 +51,43 @@ class _SegmentWalker:
     def set_forbidden_path(self, forbidden_path: list[LineString]) -> None:
         self._forbidden_path = forbidden_path
 
+    def _remove_redundant_points(self, points: list[Point]) -> list[Point]:
+        redundant_idx = []
+        for p_idx in range(1, len(points) - 1):
+            p_prev: Point = points[p_idx - 1]
+            p_curr: Point = points[p_idx]
+            p_next: Point = points[p_idx + 1]
+
+            v1 = (p_curr.x - p_prev.x, p_curr.y - p_prev.y)  # p_prev to p_curr
+            v2 = (p_next.x - p_curr.x, p_next.y - p_curr.y)  # p_curr to p_next
+            v2_90 = (v2[1], -1 * v2[0])  # v2 rotated 90 degrees
+
+            m1 = ((v1[0] ** 2) + (v1[1] ** 2)) ** 0.5
+            m2 = ((v2[0] ** 2) + (v2[1] ** 2)) ** 0.5
+
+            versor1 = (v1[0] / m1, v1[1] / m1)
+            versor2_90 = (v2_90[0] / m2, v2_90[1] / m2)
+
+            scalar_prod = versor1[0] * versor2_90[0] + versor1[1] * versor2_90[1]
+
+            # v1 // v2 <=> v1 perp v2_90 <=> v1 . v2_90 == 0
+            if abs(scalar_prod) < 0.01:
+                redundant_idx.append(p_idx)
+
+        clean_points = []
+        for p_idx, p in enumerate(points):
+            if p_idx not in redundant_idx:
+                clean_points.append(p)
+
+        return clean_points
+
+    def get_clean_path(self) -> LineString:
+        return LineString(
+            self._remove_redundant_points(
+                points=self.get_walked_points()
+            )
+        )
+
     def _get_opposite_end(self, line: LineString) -> Point | None:
         """
         If self._current_pos matches an end of the parameter line, 
@@ -73,6 +110,8 @@ class _SegmentWalker:
 
         for target in self._targets:
             if self._current_pos.distance(target) <= self._tolerance:
+                if target not in self._walked_points:
+                    self._walked_points.append(target)
                 self._target_found = True
                 return
             
@@ -149,7 +188,7 @@ class _Walk:
             print(walker)
         print(' ')
 
-    def walk(self) -> list[list]:
+    def walk(self) -> list[LineString]:
         """Manages _SegmentWalker(s) to find all posible paths to targets"""
 
         walkers = [
@@ -185,7 +224,7 @@ class _Walk:
 
         self._report_walkers(walkers, -1)
 
-        return [walker.get_walked_points() for walker in walkers]
+        return [walker.get_clean_path() for walker in walkers]
 
 
 
