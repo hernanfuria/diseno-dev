@@ -61,11 +61,14 @@ def _test1():
     print(green('walk ended'))
 
     # export paths found to shp
-    segments_walk_geometries = []
+    # segments_walk_geometries = []
+    # for pf in paths_found:
+    #     segments_walk_geometries.append(unary_union(pf))
+    path_points = []
     for pf in paths_found:
-        segments_walk_geometries.append(unary_union(pf))
-    sw_gdf = gpd.GeoDataFrame({'geometry': segments_walk_geometries}, crs=4326)
-    sw_gdf.to_file(join(SHP_PATH, 'SegmentsWalk.shp'))
+        path_points += pf
+    sw_gdf = gpd.GeoDataFrame({'geometry': path_points}, crs=4326)
+    sw_gdf.to_file(join(SHP_PATH, 'SegmentsWalkPoints.shp'))
     print(green('shp saved'))
 
     print(green("_test1 executed successfully"))

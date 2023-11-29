@@ -23,6 +23,7 @@ class _SegmentWalker:
             self, 
             total_path: list[LineString], 
             walked_path: list[LineString], 
+            walked_points: list[Point],
             current_pos: Point,
             targets: list[Point],
             target_found: bool = False,
@@ -31,6 +32,7 @@ class _SegmentWalker:
     ) -> None:
         self._total_path = total_path
         self._walked_path = walked_path
+        self._walked_points = walked_points
         self._current_pos = current_pos
         self._targets = targets
         self._target_found = target_found
@@ -42,6 +44,9 @@ class _SegmentWalker:
 
     def get_walked_path(self) -> list:
         return self._walked_path
+    
+    def get_walked_points(self) -> list:
+        return self._walked_points
 
     def set_forbidden_path(self, forbidden_path: list[LineString]) -> None:
         self._forbidden_path = forbidden_path
@@ -95,6 +100,7 @@ class _SegmentWalker:
                         _SegmentWalker(
                             total_path=self._total_path,
                             walked_path=self._walked_path + [line],
+                            walked_points=self._walked_points + [self._current_pos],
                             current_pos=opposite_end,
                             targets=self._targets,
                             target_found=False,
@@ -150,6 +156,7 @@ class _Walk:
             _SegmentWalker(  # source walker
                 total_path=self._path,
                 walked_path=[],
+                walked_points=[],
                 current_pos=self._source,
                 targets=self._targets,
                 target_found=False,
@@ -178,7 +185,7 @@ class _Walk:
 
         self._report_walkers(walkers, -1)
 
-        return [walker.get_walked_path() for walker in walkers]
+        return [walker.get_walked_points() for walker in walkers]
 
 
 
