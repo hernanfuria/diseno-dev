@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from src.logger import Logger
 from src.clic import green
 
@@ -76,6 +78,16 @@ class FATGraph:
         """
 
         return fat in self.fats
+
+    def get_edge_data(self, fat1: str, fat2: str) -> dict | None:
+        """Resturs the data of an edge if it exists, else return None"""
+
+        if not self.has_fat(fat1):
+            raise Exception(f"Can't get edge data because {fat1} is not in the graph")
+        if not self.has_fat(fat2):
+            raise Exception(f"Can't get edge data because {fat2} is not in the graph")
+
+        return self.adj_mat[self._get_index_of_fat(fat1)][self._get_index_of_fat(fat2)]
 
     def _get_index_of_fat(self, fat: str) -> int:
         """
