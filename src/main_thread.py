@@ -72,21 +72,29 @@ class MainThread:
                 #     targets=targets,
                 #     tolerance=meter * 0.5
                 # )
+                try:
+                    pft = PathFinderThread(
+                        source_fat_gdf=fats_gdf,
+                        source_fat_id_col='Numero_NAP',
+                        source_fat_idx=i,
+                        path=path,
+                        tolerance=meter * 0.5
+                    )
+                    paths_found = pft.run()
 
-                pft = PathFinderThread(
-                    source_fat_gdf=fats_gdf,
-                    source_fat_id_col='Numero_NAP',
-                    source_fat_idx=i,
-                    path=path,
-                    tolerance=meter * 0.5
-                )
-                paths_found = pft.run()
+                    print(f"{paths_found}\n")
 
-                print(f"{paths_found}\n")
-
-                all_paths += paths_found
-                all_paths_gdf = gpd.GeoDataFrame({'geometry': all_paths}, crs=4326)
-                all_paths_gdf.to_file(join(SHP_PATH, 'all_paths.shp'))
+                    all_paths += paths_found
+                    all_paths_gdf = gpd.GeoDataFrame({'geometry': all_paths}, crs=4326)
+                    all_paths_gdf.to_file(join(SHP_PATH, 'all_paths.shp'))
+                except Exception:
+                    print(red(f"ERROR IN FAT {i}\n"))
+                    try:
+                        with open(join(SHP_PATH, 'log.txt'), 'a') as log_file:
+                            log_file.write(f"ERROR IN FAT {i}\n")
+                        continue
+                    except Exception:
+                        continue
         else:
             all_paths_gdf = gpd.read_file(join(SHP_PATH, 'all_paths.shp'))
 
