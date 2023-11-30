@@ -13,6 +13,10 @@ from os.path import join
 
 from src.env import SHP_PATH
 from src.path_finder2 import _SegmentWalker, _Walk, path_finder
+from src.fat_graph import FATGraph
+from src.fat_graph_constructor import FATGraphConstructor
+from src.path_finder_thread import PathFinderThread
+from src.fat_graph_grouper_thread import FATGraphGrouperThread
 from src.clic import red, green, orange
 
 
@@ -51,28 +55,55 @@ class MainThread:
         print(green('geometries collected'))
 
         # find/collect paths
-        all_paths = []
-        for i in range(fats_gdf.index.size): 
-            s_name = fats_gdf.loc[i, 'Numero_NAP']
-            print(f"\tfinding paths from {s_name} ( {i + 1} / {fats_gdf.index.size} \t|\t{(i + 1) * 100 / fats_gdf.index.size} % )")
-            source = fats_gdf.loc[i, 'geometry']
-            # source = list(fats_gdf[fats_gdf['Numero_NAP'] == s_name]['geometry'])[0]
-            targets = list(fats_gdf[fats_gdf['Numero_NAP'] != s_name]['geometry'])
-            meter = 0.00001
-            paths_found = path_finder(
-                source=source,
-                path=path,
-                targets=targets,
-                tolerance=meter * 0.5
-            )
-            print(f"{paths_found}\n")
+        find_paths = True
 
-            all_paths += paths_found
-            all_paths_gdf = gpd.GeoDataFrame({'geometry': all_paths}, crs=4326)
-            all_paths_gdf.to_file(join(SHP_PATH, 'MainThreadTest.shp'))
+        meter = 0.00001
+        if find_paths:
+            all_paths = []
+            for i in range(fats_gdf.index.size): 
+                # s_name = fats_gdf.loc[i, 'Numero_NAP']
+                # print(f"\tfinding paths from {s_name} ( {i + 1} / {fats_gdf.index.size} \t|\t{(i + 1) * 100 / fats_gdf.index.size} % )")
+                # source = fats_gdf.loc[i, 'geometry']
+                # targets = list(fats_gdf[fats_gdf['Numero_NAP'] != s_name]['geometry'])
+                
+                # paths_found = path_finder(
+                #     source=source,
+                #     path=path,
+                #     targets=targets,
+                #     tolerance=meter * 0.5
+                # )
+
+                pft = PathFinderThread(
+                    source_fat_gdf=fats_gdf,
+                    source_fat_id_col='Numero_NAP',
+                    source_fat_idx=i,
+                    path=path,
+                    tolerance=meter * 0.5
+                )
+                paths_found = pft.run()
+
+                print(f"{paths_found}\n")
+
+                all_paths += paths_found
+                all_paths_gdf = gpd.GeoDataFrame({'geometry': all_paths}, crs=4326)
+                all_paths_gdf.to_file(join(SHP_PATH, 'all_paths.shp'))
+        else:
+            all_paths_gdf = gpd.read_file(join(SHP_PATH, 'all_paths.shp'))
 
         print(green('walk ended'))
 
         # create/collect graph
+        fatgct = FATGraphConstructor(
+            fats_gdf=fats_gdf,
+            fats_id_column='Numero_NAP',
+            all_paths_gdf=all_paths_gdf,
+            tolerance=meter * 0.1
+        )
+        fat_graph = fatgct.run()
+
         # find groups by n
-        pass
+        fatggt = FATGraphGrouperThread(
+            fat_graph=fat_graph,
+            n=16
+        )
+        groups = fatggt.run()
