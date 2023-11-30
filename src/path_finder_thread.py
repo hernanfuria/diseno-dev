@@ -14,8 +14,8 @@ from shapely import unary_union
 from os.path import join
 
 from src.clic import red, green, orange, magenta
-from fat_graph import FATGraph
-from path_finder2 import path_finder
+from src.fat_graph import FATGraph
+from src.path_finder2 import path_finder
 
 
 class PathFinderThread:  # (QThread):
