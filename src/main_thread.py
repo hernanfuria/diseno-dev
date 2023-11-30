@@ -14,7 +14,7 @@ from os.path import join
 from src.env import SHP_PATH
 from src.path_finder2 import _SegmentWalker, _Walk, path_finder
 from src.fat_graph import FATGraph
-from src.fat_graph_constructor import FATGraphConstructor
+from src.fat_graph_constructor_thread import FATGraphConstructorThread
 from src.path_finder_thread import PathFinderThread
 from src.fat_graph_grouper_thread import FATGraphGrouperThread
 from src.clic import red, green, orange
@@ -93,7 +93,7 @@ class MainThread:
         print(green('walk ended'))
 
         # create/collect graph
-        fatgct = FATGraphConstructor(
+        fatgct = FATGraphConstructorThread(
             fats_gdf=fats_gdf,
             fats_id_column='Numero_NAP',
             all_paths_gdf=all_paths_gdf,

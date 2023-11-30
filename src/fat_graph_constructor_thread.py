@@ -18,7 +18,7 @@ from fat_graph import FATGraph
 from path_finder2 import path_finder
 
 
-class FATGraphConstructor:
+class FATGraphConstructorThread:
     """Thread in charge of contructing the FATGraph"""
 
     def __init__(
