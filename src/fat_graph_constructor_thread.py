@@ -59,12 +59,14 @@ class FATGraphConstructorThread:
                                 data = fat_graph.get_edge_data(fat1, fat2)
                                 if data is None or data['weight'] > path.length:
                                     fat_graph.insert_edge(
-                                        fat1,
-                                        fat2,
-                                        {
-                                            'weight': path.length,
-                                            'linestring': path
-                                        }
+                                        (
+                                            fat1,
+                                            fat2,
+                                            {
+                                                'weight': path.length,
+                                                'linestring': path
+                                            }
+                                        )
                                     )
 
 
@@ -77,12 +79,14 @@ class FATGraphConstructorThread:
                                 data = fat_graph.get_edge_data(fat1, fat2)
                                 if data is None or data['weight'] > path.length:
                                     fat_graph.insert_edge(
-                                        fat1,
-                                        fat2,
-                                        {
-                                            'weight': path.length,
-                                            'linestring': path
-                                        }
+                                        (
+                                            fat1,
+                                            fat2,
+                                            {
+                                                'weight': path.length,
+                                                'linestring': path
+                                            }
+                                        )
                                     )
 
         return fat_graph

@@ -55,23 +55,12 @@ class MainThread:
         print(green('geometries collected'))
 
         # find/collect paths
-        find_paths = True
+        find_paths = False
 
         meter = 0.00001
         if find_paths:
             all_paths = []
             for i in range(fats_gdf.index.size): 
-                # s_name = fats_gdf.loc[i, 'Numero_NAP']
-                # print(f"\tfinding paths from {s_name} ( {i + 1} / {fats_gdf.index.size} \t|\t{(i + 1) * 100 / fats_gdf.index.size} % )")
-                # source = fats_gdf.loc[i, 'geometry']
-                # targets = list(fats_gdf[fats_gdf['Numero_NAP'] != s_name]['geometry'])
-                
-                # paths_found = path_finder(
-                #     source=source,
-                #     path=path,
-                #     targets=targets,
-                #     tolerance=meter * 0.5
-                # )
                 try:
                     pft = PathFinderThread(
                         source_fat_gdf=fats_gdf,
@@ -95,10 +84,12 @@ class MainThread:
                         continue
                     except Exception:
                         continue
+            print(green('walk ended'))
         else:
             all_paths_gdf = gpd.read_file(join(SHP_PATH, 'all_paths.shp'))
+            print(green('paths read'))
 
-        print(green('walk ended'))
+        
 
         # create/collect graph
         fatgct = FATGraphConstructorThread(
@@ -108,6 +99,9 @@ class MainThread:
             tolerance=meter * 0.1
         )
         fat_graph = fatgct.run()
+        print(fat_graph)
+        print(green('graph constructed'))
+
 
         # find groups by n
         fatggt = FATGraphGrouperThread(
@@ -115,3 +109,11 @@ class MainThread:
             n=16
         )
         groups = fatggt.run()
+
+        lines = []
+        for group in groups:
+            lines += group['edges_in_group']
+        group_paths_gdf = gpd.GeoDataFrame({'geometry': lines}, crs=4326)
+        group_paths_gdf.to_file(join(SHP_PATH, 'group_paths.shp'))
+
+        print(green('groups done'))

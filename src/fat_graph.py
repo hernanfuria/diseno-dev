@@ -37,8 +37,9 @@ class FATGraph:
         self.fats = fats
         self.adj_mat = [[None for _ in fats] for _ in fats]
 
-        for edge in edges:
-            self.insert_edge(edge)
+        if edges is not None:
+            for edge in edges:
+                self.insert_edge(edge)
 
         self.l = Logger(log_type='cli')
 
