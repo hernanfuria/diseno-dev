@@ -110,10 +110,15 @@ class MainThread:
         )
         groups = fatggt.run()
 
-        lines = []
-        for group in groups:
-            lines += group['edges_in_group']
-        group_paths_gdf = gpd.GeoDataFrame({'geometry': lines}, crs=4326)
+        groups_dict = {
+            'group': [],
+            'geometry': []
+        }
+        for group_idx, group in enumerate(groups):
+            for line in group['edges_in_group']:
+                groups_dict['group'].append(group_idx)
+                groups_dict['geometry'].append(line)
+        group_paths_gdf = gpd.GeoDataFrame(groups_dict, crs=4326)
         group_paths_gdf.to_file(join(SHP_PATH, 'group_paths.shp'))
 
         print(green('groups done'))
