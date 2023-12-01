@@ -133,7 +133,7 @@ class FATGraph:
 
         return fat
 
-    def _create_group(self, n: int, evaluate_data_key: str, retrieve_data_key: str, ignore_fats: list = []) -> dict:
+    def _create_group(self, n: int, evaluate_data_key: str, retrieve_data_key: str, ignore_fats: list = [], starting_from: str = None) -> dict:
         """
         Constructs a group of n FATs using evaluate_data_key to minimize weights, 
         and retrieve_data_key to get the edge information.
@@ -143,8 +143,10 @@ class FATGraph:
             'edges_in_group': [<edge_retrieved_data>, <edge_retrieved_data>, ...]
         }
         """
-
-        fats_in_group = [self._get_most_disconnected_fat(evaluate_data_key, ignore_fats)]
+        if starting_from is None:
+            fats_in_group = [self._get_most_disconnected_fat(evaluate_data_key, ignore_fats)]
+        else:
+            fats_in_group = [starting_from]
         edges = []
         
         while len(fats_in_group) < n:
@@ -183,7 +185,7 @@ class FATGraph:
             'edges_in_group': edges_in_group
         }
 
-    def group_by_n(self, n: int, evaluate_data_key: str, retrieve_data_key: str) -> list:
+    def group_by_n(self, n: int, evaluate_data_key: str, retrieve_data_key: str, starting_from: str = None) -> list:
         """
         Constructs groups of n FATs (max) using evaluate_data_key to minimize weights, 
         and retrieve_data_key to get the edge information.
@@ -206,7 +208,8 @@ class FATGraph:
 
         all_grouped = False
         while not all_grouped:
-            group = self._create_group(n, evaluate_data_key, retrieve_data_key, ignore_fats)
+            group = self._create_group(n, evaluate_data_key, retrieve_data_key, ignore_fats, starting_from)
+            starting_from = None
             groups.append(group)
             self._log(green('New group created'))
             self._log(green(f"\tFATs:  {group['fats_in_group']}"))
