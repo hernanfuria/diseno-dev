@@ -34,13 +34,39 @@ class FATGraphConstructorThread:
 
         self.tolerance = tolerance
 
+        self.fat_graph = FATGraph(fats=list(self.fats_gdf[self.fats_id_column]))
+
     def run(self) -> FATGraph:
         return self.create_fat_graph()
 
-    def create_fat_graph(self) -> FATGraph:
-        # create FATGraph
-        fat_graph = FATGraph(fats=list(self.fats_gdf[self.fats_id_column]))
+    def _matches_line_end(
+        self, 
+        ends: tuple[int], 
+        path: LineString, 
+        fat1: str, 
+        fat1_geom: Point, 
+        i: int
+    ):
+        if Point(path.coords[ends[0]]).distance(fat1_geom) < self.tolerance:
+            for j in range(self.fats_gdf.index.size): 
+                if j != i:
+                    fat2 = self.fats_gdf.loc[j, self.fats_id_column]
+                    fat2_geom: Point = self.fats_gdf.loc[j, 'geometry']
+                    if Point(path.coords[ends[1]]).distance(fat2_geom) < self.tolerance:
+                        data = self.fat_graph.get_edge_data(fat1, fat2)
+                        if data is None or data['weight'] > path.length:
+                            self.fat_graph.insert_edge(
+                                (
+                                    fat1,
+                                    fat2,
+                                    {
+                                        'weight': path.length,
+                                        'linestring': path
+                                    }
+                                )
+                            )
 
+    def create_fat_graph(self) -> FATGraph:
         all_paths = list(self.all_paths_gdf.geometry)
 
         # insert edges
@@ -50,44 +76,57 @@ class FATGraphConstructorThread:
                 fat1 = self.fats_gdf.loc[i, self.fats_id_column]
                 fat1_geom: Point = self.fats_gdf.loc[i, 'geometry']
 
-                if Point(path.coords[0]).distance(fat1_geom) < self.tolerance:
-                    for j in range(self.fats_gdf.index.size): 
-                        if j != i:
-                            fat2 = self.fats_gdf.loc[j, self.fats_id_column]
-                            fat2_geom: Point = self.fats_gdf.loc[j, 'geometry']
-                            if Point(path.coords[-1]).distance(fat2_geom) < self.tolerance:
-                                data = fat_graph.get_edge_data(fat1, fat2)
-                                if data is None or data['weight'] > path.length:
-                                    fat_graph.insert_edge(
-                                        (
-                                            fat1,
-                                            fat2,
-                                            {
-                                                'weight': path.length,
-                                                'linestring': path
-                                            }
-                                        )
-                                    )
+                self._matches_line_end(
+                    ends=(0, -1),
+                    path=path,
+                    fat1=fat1,
+                    fat1_geom=fat1_geom,
+                    i=i
+                )
+                # if Point(path.coords[0]).distance(fat1_geom) < self.tolerance:
+                #     for j in range(self.fats_gdf.index.size): 
+                #         if j != i:
+                #             fat2 = self.fats_gdf.loc[j, self.fats_id_column]
+                #             fat2_geom: Point = self.fats_gdf.loc[j, 'geometry']
+                #             if Point(path.coords[-1]).distance(fat2_geom) < self.tolerance:
+                #                 data = self.fat_graph.get_edge_data(fat1, fat2)
+                #                 if data is None or data['weight'] > path.length:
+                #                     self.fat_graph.insert_edge(
+                #                         (
+                #                             fat1,
+                #                             fat2,
+                #                             {
+                #                                 'weight': path.length,
+                #                                 'linestring': path
+                #                             }
+                #                         )
+                #                     )
 
+                self._matches_line_end(
+                    ends=(-1, 0),
+                    path=path,
+                    fat1=fat1,
+                    fat1_geom=fat1_geom,
+                    i=i
+                )
+                # if Point(path.coords[-1]).distance(fat1_geom) < self.tolerance:
+                #     for j in range(self.fats_gdf.index.size): 
+                #         if j != i:
+                #             fat2 = self.fats_gdf.loc[j, self.fats_id_column]
+                #             fat2_geom: Point = self.fats_gdf.loc[j, 'geometry']
+                #             if Point(path.coords[0]).distance(fat2_geom) < self.tolerance:
+                #                 data = self.fat_graph.get_edge_data(fat1, fat2)
+                #                 if data is None or data['weight'] > path.length:
+                #                     self.fat_graph.insert_edge(
+                #                         (
+                #                             fat1,
+                #                             fat2,
+                #                             {
+                #                                 'weight': path.length,
+                #                                 'linestring': path
+                #                             }
+                #                         )
+                #                     )
 
-                if Point(path.coords[-1]).distance(fat1_geom) < self.tolerance:
-                    for j in range(self.fats_gdf.index.size): 
-                        if j != i:
-                            fat2 = self.fats_gdf.loc[j, self.fats_id_column]
-                            fat2_geom: Point = self.fats_gdf.loc[j, 'geometry']
-                            if Point(path.coords[0]).distance(fat2_geom) < self.tolerance:
-                                data = fat_graph.get_edge_data(fat1, fat2)
-                                if data is None or data['weight'] > path.length:
-                                    fat_graph.insert_edge(
-                                        (
-                                            fat1,
-                                            fat2,
-                                            {
-                                                'weight': path.length,
-                                                'linestring': path
-                                            }
-                                        )
-                                    )
-
-        return fat_graph
+        return self.fat_graph
                     
